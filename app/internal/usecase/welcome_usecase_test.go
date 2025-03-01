@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	testifymock "github.com/stretchr/testify/mock"
 
-	"tmp/app/internal/entity"
-	"tmp/app/internal/usecase"
-	appmock "tmp/app/test/mock/repository"
+	"es-api/app/internal/entity/model"
+	"es-api/app/internal/usecase"
+	appmock "es-api/app/test/mock/repository"
 )
 
 func TestWelcomeUsecase_GetRandomUser(t *testing.T) {

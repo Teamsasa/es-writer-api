@@ -7,8 +7,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"tmp/app/internal/entity"
-	"tmp/app/internal/repository"
+	"es-api/app/internal/entity/model"
+	"es-api/app/internal/repository"
 )
 
 type WelcomeUsecase interface {

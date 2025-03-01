@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	testifymock "github.com/stretchr/testify/mock"
 
-	"tmp/app/internal/entity"
-	"tmp/app/internal/handler"
-	appmock "tmp/app/test/mock/usecase"
+	"es-api/app/internal/entity/model"
+	"es-api/app/internal/handler"
+	appmock "es-api/app/test/mock/usecase"
 )
 
 func TestWelcomeHandler_GetRandomUser(t *testing.T) {

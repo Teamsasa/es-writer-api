@@ -6,8 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 
-	"tmp/app/internal/repository"
-	"tmp/app/test"
+	"es-api/app/internal/repository"
+	"es-api/app/test"
 )
 
 func TestWelcomeRepository_GetAllUsers(t *testing.T) {

@@ -1,4 +1,4 @@
-module tmp
+module es-api
 
 go 1.23
 

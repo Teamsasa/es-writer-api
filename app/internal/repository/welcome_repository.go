@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 
-	"tmp/app/internal/entity"
+	"es-api/app/internal/entity/model"
 )
 
 type WelcomeRepository interface {

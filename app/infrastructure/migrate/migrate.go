@@ -3,9 +3,9 @@ package migrate
 import (
 	"log"
 
-	"gorm.io/gorm"
+	"es-api/app/internal/entity/model"
 
-	"tmp/app/internal/entity"
+	"gorm.io/gorm"
 )
 
 func RunMigrations(db *gorm.DB) {

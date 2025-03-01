@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/mock"
 
-	"tmp/app/internal/entity"
+	"es-api/app/internal/entity/model"
 )
 
 type WelcomeUsecaseMock struct {

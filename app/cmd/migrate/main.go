@@ -5,8 +5,8 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"tmp/app/infrastructure/db"
-	"tmp/app/infrastructure/migrate"
+	"es-api/app/infrastructure/db"
+	"es-api/app/infrastructure/migrate"
 )
 
 func main() {

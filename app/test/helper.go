@@ -7,9 +7,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"tmp/app/infrastructure/db"
-	"tmp/app/infrastructure/migrate"
-	"tmp/app/internal/entity"
+	"es-api/app/infrastructure/db"
+	"es-api/app/infrastructure/migrate"
+	"es-api/app/internal/entity/model"
 
 	"github.com/joho/godotenv"
 )

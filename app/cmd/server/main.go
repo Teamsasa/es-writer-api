@@ -5,11 +5,11 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"tmp/app/infrastructure/db"
-	"tmp/app/internal/handler"
-	"tmp/app/internal/repository"
-	"tmp/app/internal/router"
-	"tmp/app/internal/usecase"
+	"es-api/app/infrastructure/db"
+	"es-api/app/internal/handler"
+	"es-api/app/internal/repository"
+	"es-api/app/internal/router"
+	"es-api/app/internal/usecase"
 )
 
 func main() {
