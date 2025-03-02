@@ -5,15 +5,21 @@ import (
 	"github.com/labstack/gommon/log"
 
 	"es-api/app/internal/handler"
+	"es-api/app/middleware/cors"
 )
 
 func NewRouter(
-	wh handler.WelcomeHandler,
+	eh handler.ExperienceHandler,
+	authMiddleware echo.MiddlewareFunc,
 ) *echo.Echo {
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
 
-	e.GET("/", wh.GetRandomUser)
+	api := e.Group("/api")
+	api.Use(cors.SetupCORS(e))
+	api.Use(authMiddleware)
+	api.GET("/experience", eh.GetExperienceByUserID)
+	api.POST("/experience", eh.PostExperience)
 
 	return e
 }

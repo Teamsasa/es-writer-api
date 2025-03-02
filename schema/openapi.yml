@@ -1,0 +1,188 @@
+openapi: 3.0.0
+info:
+  title: ES API
+  version: 1.0.0
+  description: ES API
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/experience:
+    get:
+      summary: get user experience
+      tags:
+        - experience
+      parameters:
+        - name: idp
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - clerk
+              - swagger
+              - test
+            example: swagger
+            description: Identity Provider
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer xxxxxxxx
+            description: Access Token
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsesExperienceSchema'
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Unauthorized
+        "404":
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Not Found
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal Server Error
+    post:
+      summary: create user experience
+      tags:
+        - experience
+      parameters:
+        - name: idp
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - clerk
+              - swagger
+              - test
+            example: swagger
+            description: Identity Provider
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer xxxxxxxx
+            description: Access Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputExperienceSchema'
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsesExperienceSchema'
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Unauthorized
+        "404":
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Not Found
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal Server Error
+components:
+  schemas:
+    InputExperienceSchema:
+      type: object
+      properties:
+        work:
+          type: string
+          description: Work history
+          example: Work history
+        skills:
+          type: string
+          description: Skills
+          example: Skills
+        selfPR:
+          type: string
+          description: Self PR
+          example: Self PR
+        futureGoals:
+          type: string
+          description: Future goals
+          example: Future goals
+    ResponsesExperienceSchema:
+      type: object
+      properties:
+        work:
+          type: string
+          description: Work history
+          example: Work history
+        skills:
+          type: string
+          description: Skills
+          example: Skills
+        selfPR:
+          type: string
+          description: Self PR
+          example: Self PR
+        futureGoals:
+          type: string
+          description: Future goals
+          example: Future goals
+        createdAt:
+          type: string
+          description: Creation date
+          example: "2025-03-02T12:00:00Z"
+        updatedAt:
+          type: string
+          description: Last update date
+          example: "2025-03-02T12:00:00Z"
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラーメッセージ
+      required:
+        - error

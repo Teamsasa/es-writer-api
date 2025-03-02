@@ -2,27 +2,27 @@ package test
 
 import (
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"testing"
-	"time"
 
+	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 
 	"es-api/app/infrastructure/db"
 	"es-api/app/infrastructure/migrate"
-	"es-api/app/internal/entity/model"
-
-	"github.com/joho/godotenv"
 )
 
-func loadEnvFile(t *testing.T) {
-	err := godotenv.Load("../../../.env")
+func loadEnvFile(t *testing.T, path string) {
+	err := godotenv.Load(path)
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func SetupTestDB(t *testing.T) *gorm.DB {
-	loadEnvFile(t)
+func SetupTestDB(t *testing.T, path string) *gorm.DB {
+	loadEnvFile(t, path)
 
 	dbConn := db.NewTestDB()
 	migrate.RunMigrations(dbConn)
@@ -39,18 +39,12 @@ func CleanupDB(t *testing.T, dbConn *gorm.DB) {
 	sqlDB.Close()
 }
 
-func SeedTestUser(t *testing.T, dbConn *gorm.DB) entity.User {
-	user := entity.User{
-		ID:        "test-id",
-		Name:      "Test User",
-		Email:     "test@example.com",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	if err := dbConn.Create(&user).Error; err != nil {
-		t.Fatalf("Error creating test user: %v", err)
-	}
-
-	return user
+func SetupEchoContext(userID string) echo.Context {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	req.Header.Set("idp", "test")
+	ctx := e.NewContext(req, rec)
+	ctx.Set("userID", userID)
+	return ctx
 }

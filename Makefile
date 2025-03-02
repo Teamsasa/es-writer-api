@@ -18,9 +18,6 @@ down: ## Stop the application
 migrate: ## Run database migrations
 	@docker-compose run --rm api go run ../migrate/main.go
 
-seed: ## Seed the database
-	@docker-compose run --rm -e PGPASSWORD=postgres api sh -c "psql -h db -U postgres -d postgres -f ../../../seed_data.sql"
-
 prune: ## Remove dangling images
 	@docker image prune -f
 
@@ -42,9 +39,6 @@ test-handler: ## Run handler tests
 
 test-all: ## Run all tests
 	@go test -v ./app/internal/repository/... ./app/internal/usecase/... ./app/internal/handler/...
-
-test-cleanup: ## Cleanup test environment
-	@docker-compose stop test-db
 
 help: ## Display this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-15s$(RESET) %s\n", $$1, $$2}'

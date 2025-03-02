@@ -9,6 +9,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      integration-test-db:
+        condition: service_healthy
+      swagger-db:
+        condition: service_healthy
   db:
     image: postgres:latest
     container_name: postgres
@@ -25,15 +29,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  test-db:
+  integration-test-db:
     image: postgres:latest
-    container_name: test-db
+    container_name: integration-test-db
     ports:
       - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: testdb
+      POSTGRES_DB: postgres
     volumes:
       - test-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -41,7 +45,33 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  swagger-db:
+    image: postgres:latest
+    container_name: swagger-db
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - swagger-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    ports:
+      - "30000:8080"
+    environment:
+      SWAGGER_JSON: /swagger/openapi.yml
+    volumes:
+      - ./schema:/swagger
 
 volumes:
   postgres-data:
   test-postgres-data:
+  swagger-postgres-data:

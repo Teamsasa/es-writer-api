@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RunMigrations(db *gorm.DB) {
+func RunSwaggerMigrations(db *gorm.DB) {
 	err := db.AutoMigrate(&model.Users{})
 	if err != nil {
 		log.Fatalf("🔴 Error migrating User model: %s", err)

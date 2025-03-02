@@ -7,9 +7,11 @@ import (
 
 	"es-api/app/infrastructure/db"
 	"es-api/app/internal/handler"
-	"es-api/app/internal/repository"
+	clerkRepo "es-api/app/internal/repository/clerk"
+	dbRepo "es-api/app/internal/repository/db"
 	"es-api/app/internal/router"
 	"es-api/app/internal/usecase"
+	"es-api/app/middleware/auth"
 )
 
 func main() {
@@ -17,10 +19,12 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	dbConnection := db.NewDB()
-	welcomeRepository := repository.NewWelcomeRepository(dbConnection)
-	welcomeUsecase := usecase.NewWelcomeUsecase(welcomeRepository)
-	welcomeHandler := handler.NewWelcomeHandler(welcomeUsecase)
-	e := router.NewRouter(welcomeHandler)
+	dbConnManager := db.NewDBConnectionManager()
+	experienceRepository := dbRepo.NewExperienceRepositoryWithDBManager(dbConnManager)
+	clerkAuthRepository := clerkRepo.NewClerkAuthRepository()
+	experienceUsecase := usecase.NewExperienceUsecase(experienceRepository)
+	experienceHandler := handler.NewExperienceHandler(experienceUsecase)
+	authMiddleware := auth.IDPAuthMiddleware(clerkAuthRepository, dbConnManager)
+	e := router.NewRouter(experienceHandler, authMiddleware)
 	e.Logger.Fatal(e.Start(":8080"))
 }
