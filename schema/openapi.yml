@@ -42,7 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/UnauthorizedErrorSchema'
               example:
                 error: Unauthorized
         "404":
@@ -50,7 +50,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/NotFoundErrorSchema'
               example:
                 error: Not Found
         "500":
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/InternalServerErrorSchema'
               example:
                 error: Internal Server Error
     post:
@@ -102,7 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/UnauthorizedErrorSchema'
               example:
                 error: Unauthorized
         "404":
@@ -110,7 +110,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/NotFoundErrorSchema'
               example:
                 error: Not Found
         "500":
@@ -118,7 +118,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/InternalServerErrorSchema'
               example:
                 error: Internal Server Error
 components:
@@ -169,20 +169,24 @@ components:
           type: string
           description: Last update date
           example: "2025-03-02T12:00:00Z"
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-    Error:
+    UnauthorizedErrorSchema:
       type: object
       properties:
         error:
           type: string
-          description: エラーメッセージ
-      required:
-        - error
+          description: Error message
+          example: Unauthorized
+    NotFoundErrorSchema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Not Found
+    InternalServerErrorSchema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Internal Server Error
