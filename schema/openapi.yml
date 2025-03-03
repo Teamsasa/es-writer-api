@@ -5,31 +5,15 @@ info:
   description: ES API
 servers:
   - url: http://localhost:8080
+security:
+  - BearerAuth: []
+    IdpHeader: []
 paths:
   /api/experience:
     get:
       summary: get user experience
       tags:
         - experience
-      parameters:
-        - name: idp
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - clerk
-              - swagger
-              - test
-            example: swagger
-            description: Identity Provider
-        - name: Authorization
-          in: header
-          required: true
-          schema:
-            type: string
-            example: Bearer xxxxxxxx
-            description: Access Token
       responses:
         "200":
           description: success
@@ -65,25 +49,6 @@ paths:
       summary: create user experience
       tags:
         - experience
-      parameters:
-        - name: idp
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - clerk
-              - swagger
-              - test
-            example: swagger
-            description: Identity Provider
-        - name: Authorization
-          in: header
-          required: true
-          schema:
-            type: string
-            example: Bearer xxxxxxxx
-            description: Access Token
       requestBody:
         required: true
         content:
@@ -190,3 +155,11 @@ components:
           type: string
           description: Error message
           example: Internal Server Error
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    IdpHeader:
+      type: apiKey
+      in: header
+      name: idp
