@@ -1,4 +1,4 @@
-.PHONY: all up down seed prune fmt migrate help test test-setup test-repository test-usecase test-handler test-all test-cleanup
+.PHONY: all up down prune fmt migrate help test test-setup test-repository test-usecase test-handler test-all test-cleanup
 
 # Default target
 .DEFAULT_GOAL := help
@@ -7,7 +7,7 @@
 GREEN  := $(shell tput setaf 2)
 RESET  := $(shell tput sgr0)
 
-all: up migrate seed ## Start the application, run migrations and seed the database
+all: up migrate ## Start the application, run migrations
 
 up: ## Start the application
 	@docker-compose up -d --build
