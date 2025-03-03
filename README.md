@@ -46,7 +46,6 @@ ES Writer API は Go で実装されたES自動生成のための REST API サ�
 
 - Go 1.23 以上
 - Docker と Docker Compose
-- PostgreSQL
 
 ### 開発環境の起動
 
