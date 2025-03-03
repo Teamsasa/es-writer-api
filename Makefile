@@ -37,7 +37,7 @@ test-usecase: ## Run usecase tests
 test-handler: ## Run handler tests
 	@go test -v ./app/internal/handler/...
 
-test-all: ## Run all tests
+test: ## Run all tests
 	@go test -v ./app/internal/repository/... ./app/internal/usecase/... ./app/internal/handler/...
 
 help: ## Display this help message
