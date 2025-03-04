@@ -86,6 +86,42 @@ paths:
                 $ref: '#/components/schemas/InternalServerErrorSchema'
               example:
                 error: Internal Server Error
+  /api/generate:
+    post:
+      summary: generate user experience
+      tags:
+        - LLM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputGenerateSchema'
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsesGenerateSchema'
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedErrorSchema'
+        "404":
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorSchema'
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorSchema'
 components:
   schemas:
     InputExperienceSchema:
@@ -134,6 +170,68 @@ components:
           type: string
           description: Last update date
           example: "2025-03-02T12:00:00Z"
+    InputGenerateSchema:
+      type: object
+      properties:
+        company:
+          type: string
+          description: Company name
+          example: 株式会社DeNA
+        model:
+          type: string
+          description: LLM model
+          enum:
+            - gemini-2.0-flash
+            - gemini-2.0-flash-lite
+            - gemini-2.0-flash-thinking-exp
+          example: gemini-2.0-flash-thinking-exp
+        html:
+          type: string
+          description: Whether to return HTML
+          example: |
+            <body>
+              <header class="App-header">
+                <h1>ES Sample</h1>
+              </header>
+              <main>
+                <div id="entryBody">
+                  <div id="pnl_SurveyMain">
+                    <div id="pnl_SurveyItem">
+                      <div id="pnlEntryBox_1" class="entryBox">
+                        <h3>Q1. 自己PRについてご自由に記載ください。(300字以内)</h3>
+                        <div id="pnl_body1" class="body" style="text-align:center;">
+                          <textarea name="tbx_1" rows="10" cols="20" id="tbx_1" class="long"></textarea>
+                        </div>
+                      </div>
+                      <div id="pnlEntryBox_2" class="entryBox">
+                        <h3>Q2. 学生時代に力を入れたことを教えてください。(200字以内)</h3>
+                        <div id="pnl_body2" class="body" style="text-align:center;">
+                          <textarea name="tbx_2" rows="10" cols="20" id="tbx_2" class="long"></textarea>
+                        </div>
+                      </div>
+                      <div id="pnlEntryBox_3" class="entryBox">
+                        <h3>Q3. 将来の目標を教えてください。(200字以内)</h3>
+                        <div id="pnl_body3" class="body" style="text-align:center;">
+                          <textarea name="tbx_3" rows="10" cols="20" id="tbx_3" class="long"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </body>
+    ResponsesGenerateSchema:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              question:
+                type: string
+              answer:
+                type: string
     UnauthorizedErrorSchema:
       type: object
       properties:
