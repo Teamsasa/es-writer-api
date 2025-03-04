@@ -49,11 +49,15 @@ jobs:
     - name: Check code Errors
       run: go vet ./...
 
+    - name: Create test .env file
+      run: |
+        cat > .env << EOL
+        DB_HOST=localhost
+        DB_PORT=5432
+        DB_USER=postgres
+        DB_PASSWORD=postgres
+        DB_NAME=postgres
+        EOL
+
     - name: Run tests
       run: go test -v ./app/internal/repository/... ./app/internal/usecase/... ./app/internal/handler/...
-      env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_USER: postgres
-        DB_PASSWORD: postgres
-        DB_NAME: postgres
