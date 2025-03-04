@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 // 企業情報をまとめた構造体
@@ -41,7 +43,30 @@ type TavilySearchResult struct {
 	Answer string `json:"answer,omitempty"` // AIによる要約
 }
 
+// 相対パスから.envファイルを読み込む
+func loadEnvFile() bool {
+	envPath := "../../../../.env"
+	
+	// ファイルが存在するか確認
+	_, err := os.Stat(envPath)
+	if os.IsNotExist(err) {
+		log.Printf("Warning: .envファイルが見つかりません: %s", envPath)
+		return false
+	}
+	
+	err = godotenv.Load(envPath)
+	if err != nil {
+		log.Printf("Warning: .envファイルの読み込みに失敗: %v", err)
+		return false
+	}
+	
+	return true
+}
+
 func main() {
+	// .envファイルを読み込む
+	loadEnvFile()
+
 	// コマンドライン引数から企業名を取得
 	if len(os.Args) < 2 {
 		log.Fatal("使用方法: go run search_company.go \"企業名\"")
