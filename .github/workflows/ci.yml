@@ -52,15 +52,12 @@ jobs:
     - name: Create test .env file
       run: |
         cat > .env << EOL
-        DB_HOST=localhost
-        DB_PORT=5432
-        DB_USER=postgres
-        DB_PASSWORD=postgres
-        DB_NAME=postgres
+        TEST_DB_HOST=localhost
+        TEST_DB_PORT=5432
+        TEST_DB_USER=postgres
+        TEST_DB_PASSWORD=postgres
+        TEST_DB_NAME=postgres
         EOL
-
-    - name: watch .env file
-      run: cat .env
 
     - name: Run tests
       run: go test -v ./app/internal/repository/... ./app/internal/usecase/... ./app/internal/handler/...
