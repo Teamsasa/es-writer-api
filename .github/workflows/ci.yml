@@ -59,5 +59,8 @@ jobs:
         DB_NAME=postgres
         EOL
 
+    - name: watch .env file
+      run: cat .env
+
     - name: Run tests
       run: go test -v ./app/internal/repository/... ./app/internal/usecase/... ./app/internal/handler/...
