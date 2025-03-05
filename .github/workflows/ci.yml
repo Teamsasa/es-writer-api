@@ -1,0 +1,64 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Check code formatting
+      run: |
+        UNFORMATTED=$(gofmt -l .)
+        if [ -n "$UNFORMATTED" ]; then
+          echo "以下のファイルはフォーマットされていません:"
+          echo "$UNFORMATTED"
+          exit 1
+        fi
+
+    - name: Check code Errors
+      run: go vet ./...
+
+    - name: Create test .env file
+      run: |
+        cat > .env << EOL
+        TEST_DB_HOST=localhost
+        TEST_DB_PORT=5432
+        TEST_DB_USER=postgres
+        TEST_DB_PASSWORD=postgres
+        TEST_DB_NAME=postgres
+        EOL
+
+    - name: Run tests
+      run: go test -v ./app/internal/repository/... ./app/internal/usecase/... ./app/internal/handler/...
