@@ -1,4 +1,4 @@
-package main
+package repository
 
 import (
 	"context"
@@ -139,50 +139,49 @@ func searchCompanyInfoParallel(ctx context.Context, apiKey string, companyName s
 	return info, nil
 }
 
-func outputResult(info *CompanyInfo) {
-	fmt.Printf("# %s の企業理念と求める人材\n\n", info.Name)
+// 企業情報を文字列として整形して返す
+func FormatCompanyInfo(info *CompanyInfo) string {
+	var sb strings.Builder
 
-	fmt.Println("## 企業理念・バリュー")
+	sb.WriteString(fmt.Sprintf("# %s の企業理念と求める人材\n\n", info.Name))
+
+	sb.WriteString("## 企業理念・バリュー\n")
 	if info.Philosophy != "" {
 		paragraphs := strings.Split(info.Philosophy, "\n")
 		for _, p := range paragraphs {
 			if strings.TrimSpace(p) != "" {
-				fmt.Println(p)
-				fmt.Println()
+				sb.WriteString(p + "\n\n")
 			}
 		}
 	} else {
-		fmt.Println("企業理念に関する情報は取得できませんでした。")
-		fmt.Println()
+		sb.WriteString("企業理念に関する情報は取得できませんでした。\n\n")
 	}
 
 	// キャリアパス
-	fmt.Println("## 社員のキャリアパス")
+	sb.WriteString("## 社員のキャリアパス\n")
 	if info.CareerPath != "" {
 		paragraphs := strings.Split(info.CareerPath, "\n")
 		for _, p := range paragraphs {
 			if strings.TrimSpace(p) != "" {
-				fmt.Println(p)
-				fmt.Println()
+				sb.WriteString(p + "\n\n")
 			}
 		}
 	} else {
-		fmt.Println("キャリアパスに関する情報は取得できませんでした。")
-		fmt.Println()
+		sb.WriteString("キャリアパスに関する情報は取得できませんでした。\n\n")
 	}
 
 	// 求める人材
-	fmt.Println("## 求める人材像")
+	sb.WriteString("## 求める人材像\n")
 	if info.TalentNeeds != "" {
 		paragraphs := strings.Split(info.TalentNeeds, "\n")
 		for _, p := range paragraphs {
 			if strings.TrimSpace(p) != "" {
-				fmt.Println(p)
-				fmt.Println()
+				sb.WriteString(p + "\n\n")
 			}
 		}
 	} else {
-		fmt.Println("求める人材に関する情報は取得できませんでした。")
-		fmt.Println()
+		sb.WriteString("求める人材に関する情報は取得できませんでした。\n\n")
 	}
+
+	return sb.String()
 }
