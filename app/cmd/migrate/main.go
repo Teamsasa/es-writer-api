@@ -17,7 +17,7 @@ func main() {
 	dbConnection := db.NewDB()
 	swaggerDbConnection := db.NewSwaggerDB()
 	migrate.RunMigrations(dbConnection)
-	migrate.RunSwaggerMigrations(swaggerDbConnection)
+	migrate.RunMigrations(swaggerDbConnection)
 	db.CloseDB(dbConnection)
 	db.CloseDB(swaggerDbConnection)
 	log.Println("🟢 Migrations completed")
