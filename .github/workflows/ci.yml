@@ -40,9 +40,10 @@ jobs:
 
     - name: Check code formatting
       run: |
-        if [ -n "$(gofmt -l .)" ]; then
+        UNFORMATTED=$(gofmt -l .)
+        if [ -n "$UNFORMATTED" ]; then
           echo "以下のファイルはフォーマットされていません:"
-          gofmt -l .
+          echo "$UNFORMATTED"
           exit 1
         fi
 
