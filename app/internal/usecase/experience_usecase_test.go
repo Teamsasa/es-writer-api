@@ -97,4 +97,44 @@ func TestExperienceUsecase_PostExperience(t *testing.T) {
 		assert.Equal(t, createdExperience.FutureGoals, res.FutureGoals)
 		mockRepo.AssertExpectations(t)
 	})
+
+	t.Run("正常系:経験が存在する場合", func(t *testing.T) {
+		mockRepo := new(appmock.ExperienceRepositoryMock)
+
+		inputExperience := model.InputExperience{
+			Work:        "updated work",
+			Skills:      "updated skills",
+			SelfPR:      "updated self PR",
+			FutureGoals: "updated future goals",
+		}
+
+		updatedExperience := model.Experiences{
+			ID:          "test-id-1",
+			UserID:      "test-user-id",
+			Work:        inputExperience.Work,
+			Skills:      inputExperience.Skills,
+			SelfPR:      inputExperience.SelfPR,
+			FutureGoals: inputExperience.FutureGoals,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
+
+		e := echo.New()
+		ctx := e.NewContext(nil, nil)
+		mockRepo.On("FindExperienceByUserID", testifymock.Anything).Return(true, nil)
+		mockRepo.On("PatchExperience", testifymock.Anything, inputExperience).Return(updatedExperience, nil)
+
+		uc := usecase.NewExperienceUsecase(mockRepo)
+
+		res, err := uc.PostExperience(ctx, inputExperience)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, res)
+		assert.Equal(t, updatedExperience.ID, res.ID)
+		assert.Equal(t, updatedExperience.Work, res.Work)
+		assert.Equal(t, updatedExperience.Skills, res.Skills)
+		assert.Equal(t, updatedExperience.SelfPR, res.SelfPR)
+		assert.Equal(t, updatedExperience.FutureGoals, res.FutureGoals)
+		mockRepo.AssertExpectations(t)
+	})
 }

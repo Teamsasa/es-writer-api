@@ -38,7 +38,12 @@ func (u *experienceUsecase) PostExperience(c echo.Context, experience model.Inpu
 	}
 
 	if exists {
-		return nil, fmt.Errorf("experience already exists")
+		experiences, err := u.er.PatchExperience(c, experience)
+		if err != nil {
+			return nil, fmt.Errorf("failed to patch experience: %w", err)
+		}
+
+		return &experiences, nil
 	}
 
 	experiences, err := u.er.PostExperience(c, experience)
