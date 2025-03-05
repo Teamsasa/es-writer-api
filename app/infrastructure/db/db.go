@@ -23,7 +23,11 @@ type dbConnectionManager struct {
 
 func NewDBConnectionManager() DBConnectionManager {
 	prodDB := NewDB()
-	swaggerDB := NewSwaggerDB()
+
+	var swaggerDB *gorm.DB
+	if os.Getenv("IS_LOCAL") == "true" {
+		swaggerDB = NewSwaggerDB()
+	}
 
 	return &dbConnectionManager{
 		prodDB:    prodDB,
