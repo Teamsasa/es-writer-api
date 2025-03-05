@@ -25,3 +25,8 @@ func (m *ExperienceRepositoryMock) PostExperience(c echo.Context, experience mod
 	args := m.Called(c, experience)
 	return args.Get(0).(model.Experiences), args.Error(1)
 }
+
+func (m *ExperienceRepositoryMock) PatchExperience(c echo.Context, experience model.InputExperience) (model.Experiences, error) {
+	args := m.Called(c, experience)
+	return args.Get(0).(model.Experiences), args.Error(1)
+}

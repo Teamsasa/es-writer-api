@@ -90,3 +90,31 @@ func TestExperienceRepository_PostExperience(t *testing.T) {
 		assert.Equal(t, experience.FutureGoals, input.FutureGoals)
 	})
 }
+
+func TestExperienceRepository_PatchExperience(t *testing.T) {
+	db := test.SetupTestDB(t, "../../../../.env")
+	defer test.CleanupDB(t, db)
+
+	repo := repository.NewExperienceRepository(db)
+
+	t.Run("正常系:経験を更新する", func(t *testing.T) {
+		dummyUser := factory.CreateUser1(t, db)
+		_ = factory.CreateExperience1(t, db)
+
+		input := model.InputExperience{
+			Work:        "updated-work",
+			Skills:      "updated-skills",
+			SelfPR:      "updated-self-pr",
+			FutureGoals: "updated-future-goals",
+		}
+
+		ctx := test.SetupEchoContext(dummyUser.ID)
+		experience, err := repo.PatchExperience(ctx, input)
+
+		assert.NoError(t, err)
+		assert.Equal(t, experience.Work, input.Work)
+		assert.Equal(t, experience.Skills, input.Skills)
+		assert.Equal(t, experience.SelfPR, input.SelfPR)
+		assert.Equal(t, experience.FutureGoals, input.FutureGoals)
+	})
+}
