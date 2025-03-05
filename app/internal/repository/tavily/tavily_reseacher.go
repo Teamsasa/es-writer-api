@@ -1,4 +1,4 @@
-package main
+package repository
 
 import (
 	"bytes"
@@ -10,28 +10,33 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
-// 相対パスから.envファイルを読み込む
-func loadEnvFile() bool {
-	envPath := "../../../../.env"
+type TavilyRepository interface {
+	GetCompanyInfo(ctx context.Context, companyName string) (*CompanyInfo, error)
+}
 
-	// ファイルが存在するか確認
-	_, err := os.Stat(envPath)
-	if os.IsNotExist(err) {
-		log.Printf("Warning: .envファイルが見つかりません: %s", envPath)
-		return false
+type tavilyRepository struct{}
+
+func NewTavilyRepository() TavilyRepository {
+	return &tavilyRepository{}
+}
+
+// GetCompanyInfo は企業名を元に企業情報を取得する
+func (r *tavilyRepository) GetCompanyInfo(ctx context.Context, companyName string) (*CompanyInfo, error) {
+	// APIキーを設定
+	apiKey := os.Getenv("TAVILY_API_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("TAVILY_API_KEYが設定されていません")
 	}
 
-	err = godotenv.Load(envPath)
+	// 企業情報を検索
+	companyInfo, err := searchCompanyInfoParallel(ctx, apiKey, companyName)
 	if err != nil {
-		log.Printf("Warning: .envファイルの読み込みに失敗: %v", err)
-		return false
+		return nil, fmt.Errorf("企業情報の検索中にエラーが発生しました: %w", err)
 	}
 
-	return true
+	return companyInfo, nil
 }
 
 // 検索結果とAI要約を返す
@@ -104,35 +109,4 @@ func doSearch(ctx context.Context, apiKey string, query string) (*TavilySearchRe
 	}
 
 	return &result, nil
-}
-
-func search_company(companyName string) {
-	// APIキーを設定
-	apiKey := os.Getenv("TAVILY_API_KEY")
-	if apiKey == "" {
-		log.Fatal("APIキーが設定されていません")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	companyInfo, err := searchCompanyInfoParallel(ctx, apiKey, companyName)
-	if err != nil {
-		log.Fatalf("企業情報の検索中にエラーが発生しました: %v", err)
-	}
-
-	outputResult(companyInfo)
-}
-
-func main() {
-	// .envファイルを読み込む
-	loadEnvFile()
-
-	// コマンドライン引数から企業名を取得
-	if len(os.Args) < 2 {
-		log.Fatal("使用方法: go run search_company.go \"企業名\"")
-	}
-	companyName := os.Args[1]
-
-	search_company(companyName)
 }
