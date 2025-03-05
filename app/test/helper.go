@@ -14,7 +14,7 @@ import (
 	"es-api/app/infrastructure/migrate"
 )
 
-func loadEnvFile(t *testing.T, path string) {
+func LoadEnvFile(t *testing.T, path string) {
 	err := godotenv.Load(path)
 	if err != nil {
 		log.Fatalln(err)
@@ -22,7 +22,7 @@ func loadEnvFile(t *testing.T, path string) {
 }
 
 func SetupTestDB(t *testing.T, path string) *gorm.DB {
-	loadEnvFile(t, path)
+	LoadEnvFile(t, path)
 
 	dbConn := db.NewTestDB()
 	migrate.RunMigrations(dbConn)
