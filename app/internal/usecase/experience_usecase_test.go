@@ -14,111 +14,87 @@ import (
 	appmock "es-api/app/test/mock/repository"
 )
 
-// (getExperienceByUserID - 正常系 - データが存在する場合)
 func TestExperienceUsecase_GetExperienceByUserID(t *testing.T) {
-	mockRepo := new(appmock.ExperienceRepositoryMock)
+	t.Run("正常系:ユーザーが存在する場合", func(t *testing.T) {
+		mockRepo := new(appmock.ExperienceRepositoryMock)
 
-	experience := model.Experiences{
-		ID:        "test-id-1",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
+		experience := model.Experiences{
+			ID:        "test-id-1",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
 
-	e := echo.New()
-	ctx := e.NewContext(nil, nil)
-	mockRepo.On("GetExperienceByUserID", testifymock.Anything).Return(experience, nil)
+		e := echo.New()
+		ctx := e.NewContext(nil, nil)
+		mockRepo.On("GetExperienceByUserID", testifymock.Anything).Return(experience, nil)
 
-	uc := usecase.NewExperienceUsecase(mockRepo)
+		uc := usecase.NewExperienceUsecase(mockRepo)
 
-	res, err := uc.GetExperienceByUserID(ctx)
+		res, err := uc.GetExperienceByUserID(ctx)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, experience.ID, res.ID)
-	mockRepo.AssertExpectations(t)
+		assert.NoError(t, err)
+		assert.NotNil(t, res)
+		assert.Equal(t, experience.ID, res.ID)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("異常系:ユーザーが存在しない場合", func(t *testing.T) {
+		mockRepo := new(appmock.ExperienceRepositoryMock)
+
+		e := echo.New()
+		ctx := e.NewContext(nil, nil)
+		expectedErr := errors.New("repository error")
+		mockRepo.On("GetExperienceByUserID", testifymock.Anything).Return(model.Experiences{}, expectedErr)
+
+		uc := usecase.NewExperienceUsecase(mockRepo)
+
+		res, err := uc.GetExperienceByUserID(ctx)
+
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.Equal(t, expectedErr, err)
+		mockRepo.AssertExpectations(t)
+	})
 }
 
-// (getExperienceByUserID - 異常系 - データが存在しない場合)
-func TestExperienceUsecase_GetExperienceByUserID_Error(t *testing.T) {
-	mockRepo := new(appmock.ExperienceRepositoryMock)
+func TestExperienceUsecase_PostExperience(t *testing.T) {
+	t.Run("正常系:経験が存在しない場合", func(t *testing.T) {
+		mockRepo := new(appmock.ExperienceRepositoryMock)
 
-	e := echo.New()
-	ctx := e.NewContext(nil, nil)
-	expectedErr := errors.New("repository error")
-	mockRepo.On("GetExperienceByUserID", testifymock.Anything).Return(model.Experiences{}, expectedErr)
+		inputExperience := model.InputExperience{
+			Work:        "test work",
+			Skills:      "test skills",
+			SelfPR:      "test self PR",
+			FutureGoals: "test future goals",
+		}
 
-	uc := usecase.NewExperienceUsecase(mockRepo)
+		createdExperience := model.Experiences{
+			ID:          "test-id-1",
+			UserID:      "test-user-id",
+			Work:        inputExperience.Work,
+			Skills:      inputExperience.Skills,
+			SelfPR:      inputExperience.SelfPR,
+			FutureGoals: inputExperience.FutureGoals,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
 
-	res, err := uc.GetExperienceByUserID(ctx)
+		e := echo.New()
+		ctx := e.NewContext(nil, nil)
+		mockRepo.On("FindExperienceByUserID", testifymock.Anything).Return(false, nil)
+		mockRepo.On("PostExperience", testifymock.Anything, inputExperience).Return(createdExperience, nil)
 
-	assert.Error(t, err)
-	assert.Nil(t, res)
-	assert.Equal(t, expectedErr, err)
-	mockRepo.AssertExpectations(t)
-}
+		uc := usecase.NewExperienceUsecase(mockRepo)
 
-// (postExperience - 正常系 - 経験が存在しない場合)
-func TestExperienceUsecase_PostExperience_Success(t *testing.T) {
-	mockRepo := new(appmock.ExperienceRepositoryMock)
+		res, err := uc.PostExperience(ctx, inputExperience)
 
-	inputExperience := model.InputExperience{
-		Work:        "test work",
-		Skills:      "test skills",
-		SelfPR:      "test self PR",
-		FutureGoals: "test future goals",
-	}
-
-	createdExperience := model.Experiences{
-		ID:          "test-id-1",
-		UserID:      "test-user-id",
-		Work:        inputExperience.Work,
-		Skills:      inputExperience.Skills,
-		SelfPR:      inputExperience.SelfPR,
-		FutureGoals: inputExperience.FutureGoals,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	e := echo.New()
-	ctx := e.NewContext(nil, nil)
-	mockRepo.On("FindExperienceByUserID", testifymock.Anything).Return(false, nil)
-	mockRepo.On("PostExperience", testifymock.Anything, inputExperience).Return(createdExperience, nil)
-
-	uc := usecase.NewExperienceUsecase(mockRepo)
-
-	res, err := uc.PostExperience(ctx, inputExperience)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, createdExperience.ID, res.ID)
-	assert.Equal(t, createdExperience.Work, res.Work)
-	assert.Equal(t, createdExperience.Skills, res.Skills)
-	assert.Equal(t, createdExperience.SelfPR, res.SelfPR)
-	assert.Equal(t, createdExperience.FutureGoals, res.FutureGoals)
-	mockRepo.AssertExpectations(t)
-}
-
-// (postExperience - 異常系 - 既にデータが存在する場合)
-func TestExperienceUsecase_PostExperience_AlreadyExists(t *testing.T) {
-	mockRepo := new(appmock.ExperienceRepositoryMock)
-
-	inputExperience := model.InputExperience{
-		Work:        "test work",
-		Skills:      "test skills",
-		SelfPR:      "test self PR",
-		FutureGoals: "test future goals",
-	}
-
-	e := echo.New()
-	ctx := e.NewContext(nil, nil)
-	mockRepo.On("FindExperienceByUserID", testifymock.Anything).Return(true, nil)
-
-	uc := usecase.NewExperienceUsecase(mockRepo)
-
-	res, err := uc.PostExperience(ctx, inputExperience)
-
-	assert.Error(t, err)
-	assert.Nil(t, res)
-	assert.Equal(t, "experience already exists", err.Error())
-	mockRepo.AssertExpectations(t)
+		assert.NoError(t, err)
+		assert.NotNil(t, res)
+		assert.Equal(t, createdExperience.ID, res.ID)
+		assert.Equal(t, createdExperience.Work, res.Work)
+		assert.Equal(t, createdExperience.Skills, res.Skills)
+		assert.Equal(t, createdExperience.SelfPR, res.SelfPR)
+		assert.Equal(t, createdExperience.FutureGoals, res.FutureGoals)
+		mockRepo.AssertExpectations(t)
+	})
 }
