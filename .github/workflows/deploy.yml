@@ -18,14 +18,13 @@ jobs:
 
     - id: "auth"
       name: Authenticate with gcloud CLI
-      uses: google-github-actions/auth@v0
+      uses: google-github-actions/auth@v1
       with:
-        credentials: ${{ secrets.GCP_SA_KEY }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
 
     - name: "Set up Cloud SDK"
-      uses: "google-github-actions/setup-gcloud@v0"
+      uses: "google-github-actions/setup-gcloud@v1"
       with:
-        version: "latest"
         project_id: ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configure docker to use the gcloud cli
