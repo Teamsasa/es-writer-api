@@ -30,10 +30,6 @@ jobs:
     - name: Configure docker to use the gcloud cli
       run: gcloud auth configure-docker --quiet
 
-    - name: Move docker setting file 
-      run: |
-        mv run/* ./
-
     - name: Create env file from GitHub Secrets
       run: |
         cat <<EOF > .env
