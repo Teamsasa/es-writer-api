@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ESGenerateHandler はES生成ハンドラーのインターフェース
 type LLMGenerateHandler interface {
 	Generate(c echo.Context) error
 }
@@ -20,8 +19,7 @@ type llmGenerateHandler struct {
 	llmenerateUsecase usecase.LLMGenerateUsecase
 }
 
-// NewESGenerateHandler は新しいESGenerateHandlerを作成
-func NewESGenerateHandler(llmu usecase.LLMGenerateUsecase) LLMGenerateHandler {
+func NewLLMGenerateHandler(llmu usecase.LLMGenerateUsecase) LLMGenerateHandler {
 	return &llmGenerateHandler{
 		llmenerateUsecase: llmu,
 	}
