@@ -199,7 +199,7 @@ func buildPrompt(question string, companyInfo *model.CompanyInfo, experience *mo
 	sb.WriteString("3. 箇条書きやマークダウン記法は使用せず、通常の文章として書いてください\n")
 	sb.WriteString("4. 「〜です。〜ます。」といった丁寧な文体を一貫して使用してください\n")
 	sb.WriteString("5. 質問文や「自己PRは以下の通りです」などの形式的な表現は回答に含めないでください\n")
-	sb.WriteString("6. 企業名の過度な繰り返しを避け、自然な頻度で言及してください\n")
+	sb.WriteString("6. 企業名や企業理念の過度な繰り返しを避け、自然な頻度で言及してください\n")
 	sb.WriteString("7. 具体的なエピソードや経験を含め、説得力のある内容にしてください\n")
 	sb.WriteString("8. 「〜と思います」「〜と考えます」「〜できると思います」など、主観的で自然な表現を適切に使ってください\n")
 	sb.WriteString("9. 専門用語の使用は適度に控え、一般的な表現を心がけてください\n")
