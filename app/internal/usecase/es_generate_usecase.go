@@ -136,7 +136,7 @@ func (u *esGenerateUsecase) GenerateES(c echo.Context, req model.ESGenerateReque
 }
 
 // buildPrompt はLLMへのプロンプトを構築
-func buildPrompt(question string, companyInfo *tavily.CompanyInfo, experience *model.Experiences, companyName string) string {
+func buildPrompt(question string, companyInfo *model.CompanyInfo, experience *model.Experiences, companyName string) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("あなたはエントリーシートのプロ作成者です。以下の質問に回答してください：「%s」\n\n", question))
