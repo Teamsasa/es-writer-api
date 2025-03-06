@@ -192,7 +192,6 @@ func buildPrompt(question string, companyInfo *tavily.CompanyInfo, experience *m
 			sb.WriteString("\n\n")
 		}
 	}
-		
 
 	sb.WriteString("【回答作成の重要なガイドライン】\n")
 	sb.WriteString("1. 日本語のみを使用し、外国語や特殊な記号（アスタリスク*, 波ダッシュ~, ハット^ など）は一切使用しないでください\n")
@@ -205,7 +204,7 @@ func buildPrompt(question string, companyInfo *tavily.CompanyInfo, experience *m
 	sb.WriteString("8. 「〜と思います」「〜と考えます」「〜できると思います」など、主観的で自然な表現を適切に使ってください\n")
 	sb.WriteString("9. 専門用語の使用は適度に控え、一般的な表現を心がけてください\n")
 	sb.WriteString("10. 起承転結を意識した、読みやすく自然な文章構成にしてください\n")
-	
+
 	sb.WriteString("11. 出力前に回答の文字数をカウントして、文字数制限を超えていたら再度回答を作り直してください\n")
 	sb.WriteString("12. 実際の文字数が文字数制限に近づくようにしてください（少なすぎても不自然です）\n")
 
