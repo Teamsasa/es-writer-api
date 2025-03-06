@@ -47,32 +47,6 @@ func NewESGenerateUsecase(
 
 // GenerateES はHTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
 func (u *esGenerateUsecase) GenerateES(c echo.Context, req model.ESGenerateRequest) ([]model.AnswerItem, error) {
-	// ヘッダーからユーザー識別情報を取得
-	idp := c.Request().Header.Get("idp")
-	if idp == "" {
-		return nil, fmt.Errorf("認証情報(idp)が見つかりません")
-	}
-
-	// コンテキストからユーザーIDを取得
-	userIDVal := c.Get("userID")
-	if userIDVal == nil {
-		return nil, fmt.Errorf("ユーザー認証が必要です")
-	}
-
-	userID, ok := userIDVal.(string)
-	if !ok || userID == "" {
-		return nil, fmt.Errorf("無効なユーザーIDです")
-	}
-
-	// ユーザーの存在確認
-	exists, err := u.authRepo.FindUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("ユーザー情報の取得中にエラーが発生しました: %w", err)
-	}
-	if !exists {
-		return nil, fmt.Errorf("ユーザーが見つかりません")
-	}
-
 	// 1. HTMLから質問を抽出
 	questions, err := u.htmlAnalyzer.ExtractQuestions(c, req.HTML)
 	if err != nil {
