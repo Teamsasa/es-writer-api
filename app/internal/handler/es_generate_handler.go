@@ -27,19 +27,6 @@ func NewESGenerateHandler(esu usecase.ESGenerateUsecase) ESGenerateHandler {
 	}
 }
 
-// Generate godoc
-// @Summary エントリーシートの回答を生成
-// @Description HTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
-// @Tags LLM
-// @Accept json
-// @Produce json
-// @Param request body model.ESGenerateRequest true "ES生成リクエスト"
-// @Success 200 {object} model.ESGenerateResponse "生成された回答"
-// @Failure 400 {object} model.APIError "不正なリクエスト"
-// @Failure 401 {object} model.APIError "認証エラー"
-// @Failure 404 {object} model.APIError "リソースが見つからない"
-// @Failure 500 {object} model.APIError "内部サーバーエラー"
-// @Router /api/generate [post]
 func (h *esGenerateHandler) Generate(c echo.Context) error {
 	// リクエストをバインド
 	req := new(model.ESGenerateRequest)
@@ -75,20 +62,11 @@ func (h *esGenerateHandler) Generate(c echo.Context) error {
 		log.Printf("ES生成エラー: %v, 企業: %s", err, req.Company)
 
 		// エラータイプに応じたHTTPステータス
-		switch {
-		case isAuthError(err):
-			return echo.NewHTTPError(http.StatusUnauthorized, map[string]string{
-				"error": "認証に失敗しました",
-			})
-		case isNotFoundError(err):
-			return echo.NewHTTPError(http.StatusNotFound, map[string]string{
-				"error": "リソースが見つかりません",
-			})
-		case isValidationError(err):
+		if isValidationError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, map[string]string{
 				"error": err.Error(),
 			})
-		default:
+		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
 				"error": "回答生成中にエラーが発生しました",
 			})
@@ -96,20 +74,6 @@ func (h *esGenerateHandler) Generate(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, result)
-}
-
-// エラータイプ判定用のヘルパー関数
-func isAuthError(err error) bool {
-	errorMsg := err.Error()
-	return strings.Contains(errorMsg, "認証") ||
-		strings.Contains(errorMsg, "ユーザーID") ||
-		strings.Contains(errorMsg, "権限がありません")
-}
-
-func isNotFoundError(err error) bool {
-	errorMsg := err.Error()
-	return strings.Contains(errorMsg, "見つかりません") ||
-		strings.Contains(errorMsg, "存在しません")
 }
 
 func isValidationError(err error) bool {
