@@ -10,10 +10,12 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"es-api/app/internal/entity/model"
 )
 
 type TavilyRepository interface {
-	GetCompanyInfo(ctx context.Context, companyName string) (*CompanyInfo, error)
+	GetCompanyInfo(ctx context.Context, companyName string) (*model.CompanyInfo, error)
 }
 
 type tavilyRepository struct{}
@@ -23,7 +25,7 @@ func NewTavilyRepository() TavilyRepository {
 }
 
 // GetCompanyInfo は企業名を元に企業情報を取得する
-func (r *tavilyRepository) GetCompanyInfo(ctx context.Context, companyName string) (*CompanyInfo, error) {
+func (r *tavilyRepository) GetCompanyInfo(ctx context.Context, companyName string) (*model.CompanyInfo, error) {
 	// APIキーを設定
 	apiKey := os.Getenv("TAVILY_API_KEY")
 	if apiKey == "" {
@@ -40,8 +42,8 @@ func (r *tavilyRepository) GetCompanyInfo(ctx context.Context, companyName strin
 }
 
 // 検索結果とAI要約を返す
-func searchWithAnswer(ctx context.Context, apiKey string, query string) (*TavilySearchResult, error) {
-	var result *TavilySearchResult
+func searchWithAnswer(ctx context.Context, apiKey string, query string) (*model.TavilySearchResult, error) {
+	var result *model.TavilySearchResult
 	var lastErr error
 
 	// 最大3回のリトライを実行
@@ -67,8 +69,8 @@ func searchWithAnswer(ctx context.Context, apiKey string, query string) (*Tavily
 }
 
 // 実際の検索リクエストを実行する内部関数
-func doSearch(ctx context.Context, apiKey string, query string) (*TavilySearchResult, error) {
-	params := TavilySearchParams{
+func doSearch(ctx context.Context, apiKey string, query string) (*model.TavilySearchResult, error) {
+	params := model.TavilySearchParams{
 		Query:         query,
 		SearchDepth:   "advanced",
 		MaxResults:    5,
@@ -103,7 +105,7 @@ func doSearch(ctx context.Context, apiKey string, query string) (*TavilySearchRe
 		return nil, fmt.Errorf("API error: %s - %s", resp.Status, string(bodyBytes))
 	}
 
-	var result TavilySearchResult
+	var result model.TavilySearchResult
 	if err := json.Unmarshal(bodyBytes, &result); err != nil {
 		return nil, fmt.Errorf("JSON解析エラー: %v - レスポンス: %s", err, string(bodyBytes))
 	}
