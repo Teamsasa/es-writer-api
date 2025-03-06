@@ -10,7 +10,6 @@ import (
 	"es-api/app/internal/entity/model"
 	db "es-api/app/internal/repository/db"
 	gemini "es-api/app/internal/repository/gemini"
-	"es-api/app/internal/repository/parse_html"
 	tavily "es-api/app/internal/repository/tavily"
 
 	"github.com/labstack/echo/v4"
@@ -21,34 +20,34 @@ type ESGenerateUsecase interface {
 }
 
 type esGenerateUsecase struct {
-	htmlAnalyzer    parse_html.HTMLAnalyzer
-	llmService      gemini.GeminiRepository
-	companyInfoRepo tavily.TavilyRepository
-	experienceRepo  db.ExperienceRepository
-	authRepo        db.DBAuthRepository
+	htmlExtractUsecase HTMLExtractUsecase
+	llmService         gemini.GeminiRepository
+	companyInfoRepo    tavily.TavilyRepository
+	experienceRepo     db.ExperienceRepository
+	authRepo           db.DBAuthRepository
 }
 
 // NewESGenerateUsecase は新しいESGenerateUsecaseを作成
 func NewESGenerateUsecase(
-	htmlAnalyzer parse_html.HTMLAnalyzer,
+	htmlExtractUsecase HTMLExtractUsecase,
 	llmService gemini.GeminiRepository,
 	companyInfoRepo tavily.TavilyRepository,
 	experienceRepo db.ExperienceRepository,
 	authRepo db.DBAuthRepository,
 ) ESGenerateUsecase {
 	return &esGenerateUsecase{
-		htmlAnalyzer:    htmlAnalyzer,
-		llmService:      llmService,
-		companyInfoRepo: companyInfoRepo,
-		experienceRepo:  experienceRepo,
-		authRepo:        authRepo,
+		htmlExtractUsecase: htmlExtractUsecase,
+		llmService:         llmService,
+		companyInfoRepo:    companyInfoRepo,
+		experienceRepo:     experienceRepo,
+		authRepo:           authRepo,
 	}
 }
 
 // GenerateES はHTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
 func (u *esGenerateUsecase) GenerateES(c echo.Context, req model.ESGenerateRequest) ([]model.AnswerItem, error) {
 	// 1. HTMLから質問を抽出
-	questions, err := u.htmlAnalyzer.ExtractQuestions(c, req.HTML)
+	questions, err := u.htmlExtractUsecase.ExtractQuestions(c, req.HTML)
 	if err != nil {
 		return nil, fmt.Errorf("質問抽出に失敗しました: %w", err)
 	}
