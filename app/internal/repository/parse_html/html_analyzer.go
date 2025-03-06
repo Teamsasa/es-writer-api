@@ -34,8 +34,6 @@ func (a *htmlAnalyzerImpl) ExtractQuestions(c echo.Context, html string) ([]stri
 		return nil, fmt.Errorf("HTMLが空です")
 	}
 
-	// HTMLを適切な長さに調整（Geminiの入力制限に合わせる）
-
 	// Gemini用のプロンプトを構築
 	prompt := `以下のHTMLはエントリーシート(ES)の入力フォームです。
 このHTMLから入力欄に対応する質問文を抽出し、リストアップしてください。
