@@ -15,11 +15,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type ESGenerateUsecase interface {
-	GenerateES(c echo.Context, req model.ESGenerateRequest) ([]model.AnswerItem, error)
+type LLMGenerateUsecase interface {
+	LLMGenerate(c echo.Context, req model.LLMGenerateRequest) ([]model.GeneratedAnswer, error)
 }
 
-type esGenerateUsecase struct {
+type llmGenerateUsecase struct {
 	htmlExtractUsecase HTMLExtractUsecase
 	llmService         gemini.GeminiRepository
 	companyInfoRepo    tavily.TavilyRepository
@@ -27,15 +27,15 @@ type esGenerateUsecase struct {
 	authRepo           db.DBAuthRepository
 }
 
-// NewESGenerateUsecase は新しいESGenerateUsecaseを作成
-func NewESGenerateUsecase(
+// NewLLMGenerateUsecase は新しいLLMGenerateUsecaseを作成
+func NewLLMGenerateUsecase(
 	htmlExtractUsecase HTMLExtractUsecase,
 	llmService gemini.GeminiRepository,
 	companyInfoRepo tavily.TavilyRepository,
 	experienceRepo db.ExperienceRepository,
 	authRepo db.DBAuthRepository,
-) ESGenerateUsecase {
-	return &esGenerateUsecase{
+) LLMGenerateUsecase {
+	return &llmGenerateUsecase{
 		htmlExtractUsecase: htmlExtractUsecase,
 		llmService:         llmService,
 		companyInfoRepo:    companyInfoRepo,
@@ -44,8 +44,8 @@ func NewESGenerateUsecase(
 	}
 }
 
-// GenerateES はHTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
-func (u *esGenerateUsecase) GenerateES(c echo.Context, req model.ESGenerateRequest) ([]model.AnswerItem, error) {
+// LLMGenerate はHTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
+func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRequest) ([]model.GeneratedAnswer, error) {
 	// 1. HTMLから質問を抽出
 	questions, err := u.htmlExtractUsecase.ExtractQuestions(c, req.HTML)
 	if err != nil {
@@ -73,7 +73,7 @@ func (u *esGenerateUsecase) GenerateES(c echo.Context, req model.ESGenerateReque
 	}
 
 	// 4. 質問ごとに回答を生成
-	answers := make([]model.AnswerItem, 0, len(questions))
+	answers := make([]model.GeneratedAnswer, 0, len(questions))
 	llmModel := model.LLMModel(req.Model)
 
 	for _, question := range questions {
@@ -93,11 +93,11 @@ func (u *esGenerateUsecase) GenerateES(c echo.Context, req model.ESGenerateReque
 		}
 
 		// 結果を追加
-		answerItem := model.AnswerItem{
+		GeneratedAnswer := model.GeneratedAnswer{
 			Question: question,
 			Answer:   geminiResponse.Text,
 		}
-		answers = append(answers, answerItem)
+		answers = append(answers, GeneratedAnswer)
 	}
 
 	// 回答が生成できなかった場合

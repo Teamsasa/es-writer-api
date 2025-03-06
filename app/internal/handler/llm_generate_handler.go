@@ -12,24 +12,24 @@ import (
 )
 
 // ESGenerateHandler はES生成ハンドラーのインターフェース
-type ESGenerateHandler interface {
+type LLMGenerateHandler interface {
 	Generate(c echo.Context) error
 }
 
-type esGenerateHandler struct {
-	esGenerateUsecase usecase.ESGenerateUsecase
+type llmGenerateHandler struct {
+	llmenerateUsecase usecase.LLMGenerateUsecase
 }
 
 // NewESGenerateHandler は新しいESGenerateHandlerを作成
-func NewESGenerateHandler(esu usecase.ESGenerateUsecase) ESGenerateHandler {
-	return &esGenerateHandler{
-		esGenerateUsecase: esu,
+func NewESGenerateHandler(llmu usecase.LLMGenerateUsecase) LLMGenerateHandler {
+	return &llmGenerateHandler{
+		llmenerateUsecase: llmu,
 	}
 }
 
-func (h *esGenerateHandler) Generate(c echo.Context) error {
+func (h *llmGenerateHandler) Generate(c echo.Context) error {
 	// リクエストをバインド
-	req := new(model.ESGenerateRequest)
+	req := new(model.LLMGenerateRequest)
 	if err := c.Bind(req); err != nil {
 		log.Printf("リクエストバインドエラー: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{
@@ -55,7 +55,7 @@ func (h *esGenerateHandler) Generate(c echo.Context) error {
 	}
 
 	// ユースケース内でユーザー情報の取得とバリデーションを行う
-	result, err := h.esGenerateUsecase.GenerateES(c, *req)
+	result, err := h.llmenerateUsecase.LLMGenerate(c, *req)
 
 	// エラーハンドリング
 	if err != nil {

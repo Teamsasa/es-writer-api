@@ -1,11 +1,11 @@
 package model
 
-type AnswerItem struct {
+type GeneratedAnswer struct {
 	Question string `json:"question"`
 	Answer   string `json:"answer"`
 }
 
-type ESGenerateRequest struct {
+type LLMGenerateRequest struct {
 	Questions []string `json:"questions"`
 	Company   string   `json:"company"`
 	HTML      string   `json:"html"`

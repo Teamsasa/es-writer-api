@@ -10,7 +10,7 @@ import (
 
 func NewRouter(
 	eh handler.ExperienceHandler,
-	gh handler.ESGenerateHandler,
+	gh handler.LLMGenerateHandler,
 	authMiddleware echo.MiddlewareFunc,
 ) *echo.Echo {
 	e := echo.New()
