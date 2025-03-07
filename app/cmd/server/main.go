@@ -26,10 +26,8 @@ func main() {
 	clerkAuthRepository := clerkRepo.NewClerkAuthRepository()
 	geminiRepository := geminiRepo.NewGeminiRepository()
 	tavilyRepository := tavilyRepo.NewTavilyRepository()
-	htmlExtractUsecase := usecase.NewHTMLExtractUsecase(geminiRepository)
 	experienceUsecase := usecase.NewExperienceUsecase(experienceRepository)
 	llmGenerateUsecase := usecase.NewLLMGenerateUsecase(
-		htmlExtractUsecase,
 		geminiRepository,
 		tavilyRepository,
 		experienceRepository,
