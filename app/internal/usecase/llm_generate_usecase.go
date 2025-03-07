@@ -39,7 +39,7 @@ func NewHTMLExtractUsecase(geminiRepository gemini.GeminiRepository) HTMLExtract
 
 type llmGenerateUsecase struct {
 	htmlExtractUsecase HTMLExtractUsecase
-	llmService         gemini.GeminiRepository
+	geminiRepo         gemini.GeminiRepository
 	companyInfoRepo    tavily.TavilyRepository
 	experienceRepo     db.ExperienceRepository
 }
@@ -47,13 +47,13 @@ type llmGenerateUsecase struct {
 // NewLLMGenerateUsecase は新しいLLMGenerateUsecaseを作成
 func NewLLMGenerateUsecase(
 	htmlExtractUsecase HTMLExtractUsecase,
-	llmService gemini.GeminiRepository,
+	geminiRepo gemini.GeminiRepository,
 	companyInfoRepo tavily.TavilyRepository,
 	experienceRepo db.ExperienceRepository,
 ) LLMGenerateUsecase {
 	return &llmGenerateUsecase{
 		htmlExtractUsecase: htmlExtractUsecase,
-		llmService:         llmService,
+		geminiRepo:         geminiRepo,
 		companyInfoRepo:    companyInfoRepo,
 		experienceRepo:     experienceRepo,
 	}
@@ -105,7 +105,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 			Text:  prompt,
 		}
 
-		geminiResponse, err := u.llmService.GetGeminiRequest(c, llmInput)
+		geminiResponse, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
 		if err != nil {
 			log.Printf("質問「%s」への回答生成に失敗: %v", question, err)
 			continue
