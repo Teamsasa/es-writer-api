@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -73,7 +74,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 20*time.Second)
 	defer cancel()
 
-	companyInfo, err := u.companyInfoRepo.GetCompanyInfo(ctx, req.Company)
+	companyInfo, err := u.GetCompanyInfo(ctx, req.Company)
 	if err != nil {
 		// 企業情報がなくても回答を生成したいので、エラーはログに記録するのみ
 		log.Printf("企業情報の取得に失敗しました: %v", err)
@@ -256,4 +257,21 @@ func (u *htmlExtractUsecase) parseQuestionList(text string) []string {
 	questions := strings.Split(text, "*#*")
 
 	return questions
+}
+
+// GetCompanyInfo は企業名を元に企業情報を取得する
+func (u *llmGenerateUsecase) GetCompanyInfo(ctx context.Context, companyName string) (*model.CompanyInfo, error) {
+	// APIキーを設定
+	apiKey := os.Getenv("TAVILY_API_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("TAVILY_API_KEYが設定されていません")
+	}
+
+	// 企業情報を検索
+	companyInfo, err := u.companyInfoRepo.SearchCompanyInfoParallel(ctx, apiKey, companyName)
+	if err != nil {
+		return nil, fmt.Errorf("企業情報の検索中にエラーが発生しました: %w", err)
+	}
+
+	return companyInfo, nil
 }
