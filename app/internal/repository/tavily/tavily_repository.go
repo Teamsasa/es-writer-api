@@ -14,7 +14,7 @@ import (
 )
 
 type TavilyRepository interface {
-	SearchWithAnswer(ctx context.Context, apiKey string, query string) (*model.TavilySearchResult, error) 
+	SearchWithAnswer(ctx context.Context, apiKey string, query string) (*model.TavilySearchResult, error)
 }
 
 type tavilyRepository struct{}

@@ -46,7 +46,7 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "LLM生成に失敗しました",
-		})	
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
