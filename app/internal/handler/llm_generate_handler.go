@@ -30,48 +30,71 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 	req := new(model.LLMGenerateRequest)
 	if err := c.Bind(req); err != nil {
 		log.Printf("リクエストバインドエラー: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "リクエストの解析に失敗しました",
 		})
 	}
 
-	// 基本的なバリデーション
-	if req.Company == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{
-			"error": "企業名は必須です",
-		})
-	}
-	if req.HTML == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{
-			"error": "HTMLは必須です",
+	if req.Company == "" || req.HTML == "" {
+		log.Printf("必須パラメータ不足: company=%v, html=%v", req.Company != "", req.HTML != "")
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "必要なパラメータが不足しています",
 		})
 	}
 
-
-	// ユースケース内でユーザー情報の取得とバリデーションを行う
 	result, err := h.llmenerateUsecase.LLMGenerate(c, *req)
 
-	// エラーハンドリング
 	if err != nil {
-		log.Printf("ES生成エラー: %v, 企業: %s", err, req.Company)
+		log.Printf("LLM生成エラー: %v, 企業: %s", err, req.Company)
 
-		// エラータイプに応じたHTTPステータス
-		if isValidationError(err) {
-			return echo.NewHTTPError(http.StatusBadRequest, map[string]string{
-				"error": err.Error(),
-			})
-		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
-				"error": "回答生成中にエラーが発生しました",
+		if isAuthError(err) {
+			return c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "認証エラー",
 			})
 		}
+
+		if isNotFoundError(err) {
+			return c.JSON(http.StatusNotFound, map[string]string{
+				"error": "リソースが見つかりません",
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "回答生成中にエラーが発生しました",
+		})
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"answers": result,
+	})
 }
 
-func isValidationError(err error) bool {
-	errorMsg := err.Error()
-	return strings.Contains(errorMsg, "無効な") ||
-		strings.Contains(errorMsg, "必須です")
+func isAuthError(err error) bool {
+	errMsg := err.Error()
+	return contains(errMsg, []string{
+		"認証",
+		"unauthorized",
+		"認証情報",
+		"ログイン",
+		"トークン",
+		"セッション",
+	})
+}
+
+func isNotFoundError(err error) bool {
+	errMsg := err.Error()
+	return contains(errMsg, []string{
+		"見つかりません",
+		"not found",
+		"存在しません",
+	})
+}
+
+func contains(s string, keywords []string) bool {
+	for _, keyword := range keywords {
+		if strings.Contains(s, keyword) {
+			return true
+		}
+	}
+	return false
 }
