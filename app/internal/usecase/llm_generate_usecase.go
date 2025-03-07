@@ -88,7 +88,11 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 
 	// 4. 質問ごとに回答を生成
 	answers := make([]model.LLMGeneratedResponse, 0, len(questions))
-	llmModel := model.LLMModel(req.Model)
+
+	llmModel := model.GeminiFlashLite
+	if model.LLMModel(req.Model) != "" {
+		llmModel = model.LLMModel(req.Model)
+	}
 
 	for _, question := range questions {
 		// プロンプトを作成

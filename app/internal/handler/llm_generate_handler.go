@@ -47,10 +47,6 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 		})
 	}
 
-	// デフォルトモデル設定
-	if req.Model == "" {
-		req.Model = string(model.GeminiFlashLite)
-	}
 
 	// ユースケース内でユーザー情報の取得とバリデーションを行う
 	result, err := h.llmenerateUsecase.LLMGenerate(c, *req)
