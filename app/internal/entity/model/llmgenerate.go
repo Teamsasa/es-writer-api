@@ -1,6 +1,6 @@
 package model
 
-type GeneratedAnswer struct {
+type LLMGeneratedResponse struct {
 	Question string `json:"question"`
 	Answer   string `json:"answer"`
 }

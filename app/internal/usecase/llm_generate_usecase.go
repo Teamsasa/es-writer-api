@@ -24,7 +24,6 @@ type llmGenerateUsecase struct {
 	llmService         gemini.GeminiRepository
 	companyInfoRepo    tavily.TavilyRepository
 	experienceRepo     db.ExperienceRepository
-	authRepo           db.DBAuthRepository
 }
 
 // NewLLMGenerateUsecase は新しいLLMGenerateUsecaseを作成
@@ -43,7 +42,7 @@ func NewLLMGenerateUsecase(
 }
 
 // LLMGenerate はHTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
-func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRequest) ([]model.GeneratedAnswer, error) {
+func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRequest) ([]model.LLMGeneratedResponse, error) {
 	// 1. HTMLから質問を抽出
 	questions, err := u.htmlExtractUsecase.ExtractQuestions(c, req.HTML)
 	if err != nil {
@@ -71,7 +70,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	// 4. 質問ごとに回答を生成
-	answers := make([]model.GeneratedAnswer, 0, len(questions))
+	answers := make([]model.LLMGeneratedResponse, 0, len(questions))
 	llmModel := model.LLMModel(req.Model)
 
 	for _, question := range questions {
@@ -91,11 +90,11 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 		}
 
 		// 結果を追加
-		GeneratedAnswer := model.GeneratedAnswer{
+		LLMGeneratedResponse := model.LLMGeneratedResponse{
 			Question: question,
 			Answer:   geminiResponse.Text,
 		}
-		answers = append(answers, GeneratedAnswer)
+		answers = append(answers, LLMGeneratedResponse)
 	}
 
 	// 回答が生成できなかった場合
