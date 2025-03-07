@@ -246,10 +246,6 @@ func (u *htmlExtractUsecase) ExtractQuestions(c echo.Context, html string) ([]st
 	// Geminiの応答から質問リストを抽出
 	questions := u.parseQuestionList(geminiResponse.Text)
 
-	if len(questions) == 0 {
-		return nil, fmt.Errorf("質問が見つかりませんでした")
-	}
-
 	return questions, nil
 }
 
