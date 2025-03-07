@@ -40,7 +40,6 @@ func main() {
 		geminiRepository,
 		tavilyRepository,
 		experienceRepository,
-		nil,
 	)
 
 	// ハンドラーの初期化

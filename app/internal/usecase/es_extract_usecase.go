@@ -69,17 +69,9 @@ func (u *htmlExtractUsecase) ExtractQuestions(c echo.Context, html string) ([]st
 	return questions, nil
 }
 
-// parseQuestionList はGeminiの応答から質問リストを抽出
 func (u *htmlExtractUsecase) parseQuestionList(text string) []string {
 	// 質問リストを取得
 	questions := strings.Split(text, "*#*")
 
-	// 空の質問を削除
-	var filteredQuestions []string
-	for _, q := range questions {
-		trimmed := strings.TrimSpace(q)
-		filteredQuestions = append(filteredQuestions, trimmed)
-	}
-
-	return filteredQuestions
+	return questions
 }

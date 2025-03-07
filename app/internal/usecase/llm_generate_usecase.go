@@ -33,14 +33,12 @@ func NewLLMGenerateUsecase(
 	llmService gemini.GeminiRepository,
 	companyInfoRepo tavily.TavilyRepository,
 	experienceRepo db.ExperienceRepository,
-	authRepo db.DBAuthRepository,
 ) LLMGenerateUsecase {
 	return &llmGenerateUsecase{
 		htmlExtractUsecase: htmlExtractUsecase,
 		llmService:         llmService,
 		companyInfoRepo:    companyInfoRepo,
 		experienceRepo:     experienceRepo,
-		authRepo:           authRepo,
 	}
 }
 
