@@ -70,7 +70,9 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	// 4. 質問ごとに回答を生成
-	answers := make([]model.LLMGeneratedResponse, 0, len(questions))
+	var wg sync.WaitGroup
+	responseCh := make(chan model.LLMGeneratedResponse, len(questions))
+	errorCh := make(chan error, len(questions))
 
 	llmModel := model.GeminiFlashLite
 	if model.LLMModel(req.Model) != "" {
@@ -78,31 +80,53 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	for _, question := range questions {
-		// プロンプトを作成
-		prompt := u.buildPrompt(question, companyInfo, &experience, req.Company)
+		wg.Add(1)
+		go func(q string) {
+			defer wg.Done()
 
-		// LLMで回答を生成
-		llmInput := model.GeminiInput{
-			Model: llmModel,
-			Text:  prompt,
-		}
+			prompt := u.buildPrompt(q, companyInfo, &experience, req.Company)
 
-		geminiResponse, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
-		if err != nil {
-			log.Printf("質問「%s」への回答生成に失敗: %v", question, err)
-			continue
-		}
+			llmInput := model.GeminiInput{
+				Model: llmModel,
+				Text:  prompt,
+			}
 
-		// 結果を追加
-		LLMGeneratedResponse := model.LLMGeneratedResponse{
-			Question: question,
-			Answer:   geminiResponse.Text,
-		}
-		answers = append(answers, LLMGeneratedResponse)
+			geminiResponse, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
+			if err != nil {
+				log.Printf("質問「%s」への回答生成に失敗: %v", q, err)
+				errorCh <- fmt.Errorf("質問「%s」への回答生成に失敗: %v", q, err)
+				return
+			}
+
+			responseCh <- model.LLMGeneratedResponse{
+				Question: q,
+				Answer:   geminiResponse.Text,
+			}
+		}(question)
 	}
 
-	// 回答が生成できなかった場合
-	if len(answers) == 0 {
+	go func() {
+		wg.Wait()
+		close(responseCh)
+		close(errorCh)
+	}()
+
+	answers := make([]model.LLMGeneratedResponse, 0, len(questions))
+	for response := range responseCh {
+		answers = append(answers, response)
+	}
+
+	if len(answers) != len(questions) {
+		var firstError error
+		for err := range errorCh {
+			if firstError == nil {
+				firstError = err
+			}
+		}
+
+		if firstError != nil {
+			return nil, firstError
+		}
 		return nil, fmt.Errorf("回答を生成できませんでした")
 	}
 
