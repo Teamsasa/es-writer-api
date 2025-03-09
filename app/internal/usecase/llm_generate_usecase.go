@@ -89,26 +89,43 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 		go func(idx int, q string) {
 			defer wg.Done()
 
-			prompt := u.buildPrompt(q, companyInfo, &experience, req.Company)
-
-			llmInput := model.GeminiInput{
-				Model: llmModel,
-				Text:  prompt,
+			type apiResponse struct {
+				response model.GeminiResponse
+				err      error
 			}
+			resultCh := make(chan apiResponse, 1)
 
-			geminiResponse, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
-			if err != nil {
-				log.Printf("質問「%s」への回答生成に失敗: %v", q, err)
-				errorCh <- fmt.Errorf("質問「%s」への回答生成に失敗: %v", q, err)
-				return
-			}
+			go func() {
+				prompt := u.buildPrompt(q, companyInfo, &experience, req.Company)
+				llmInput := model.GeminiInput{
+					Model: llmModel,
+					Text:  prompt,
+				}
 
-			responseCh <- indexedResponse{
-				index: idx,
-				resp: model.LLMGeneratedResponse{
-					Question: q,
-					Answer:   geminiResponse.Text,
-				},
+				resp, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
+				resultCh <- apiResponse{
+					response: resp,
+					err:      err,
+				}
+			}()
+
+			select {
+			case result := <-resultCh:
+				if result.err != nil {
+					errorCh <- fmt.Errorf("質問「%s」への回答生成に失敗: %v", q, result.err)
+					return
+				}
+
+				responseCh <- indexedResponse{
+					index: idx,
+					resp: model.LLMGeneratedResponse{
+						Question: q,
+						Answer:   result.response.Text,
+					},
+				}
+
+			case <-time.After(20 * time.Second):
+				errorCh <- fmt.Errorf("質問「%s」の回答生成がタイムアウトしました（20秒）", q)
 			}
 		}(i, question)
 	}
