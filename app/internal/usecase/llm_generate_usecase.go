@@ -71,7 +71,12 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 
 	// 4. 質問ごとに回答を生成
 	var wg sync.WaitGroup
-	responseCh := make(chan model.LLMGeneratedResponse, len(questions))
+
+	type indexedResponse struct {
+		index int
+		resp  model.LLMGeneratedResponse
+	}
+	responseCh := make(chan indexedResponse, len(questions))
 	errorCh := make(chan error, len(questions))
 
 	llmModel := model.GeminiFlashLite
@@ -79,9 +84,9 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 		llmModel = model.LLMModel(req.Model)
 	}
 
-	for _, question := range questions {
+	for i, question := range questions {
 		wg.Add(1)
-		go func(q string) {
+		go func(idx int, q string) {
 			defer wg.Done()
 
 			prompt := u.buildPrompt(q, companyInfo, &experience, req.Company)
@@ -98,11 +103,14 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 				return
 			}
 
-			responseCh <- model.LLMGeneratedResponse{
-				Question: q,
-				Answer:   geminiResponse.Text,
+			responseCh <- indexedResponse{
+				index: idx,
+				resp: model.LLMGeneratedResponse{
+					Question: q,
+					Answer:   geminiResponse.Text,
+				},
 			}
-		}(question)
+		}(i, question)
 	}
 
 	go func() {
@@ -111,12 +119,18 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 		close(errorCh)
 	}()
 
-	answers := make([]model.LLMGeneratedResponse, 0, len(questions))
-	for response := range responseCh {
-		answers = append(answers, response)
+	answers := make([]model.LLMGeneratedResponse, len(questions))
+	for i := range answers {
+		answers[i] = model.LLMGeneratedResponse{}
+	}
+	validAnswers := 0
+
+	for resp := range responseCh {
+		answers[resp.index] = resp.resp
+		validAnswers++
 	}
 
-	if len(answers) != len(questions) {
+	if validAnswers != len(questions) {
 		var firstError error
 		for err := range errorCh {
 			if firstError == nil {
