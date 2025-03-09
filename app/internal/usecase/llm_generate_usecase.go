@@ -131,15 +131,8 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	if validAnswers != len(questions) {
-		var firstError error
-		for err := range errorCh {
-			if firstError == nil {
-				firstError = err
-			}
-		}
-
-		if firstError != nil {
-			return nil, firstError
+		if err, ok := <-errorCh; ok {
+			return nil, err
 		}
 		return nil, fmt.Errorf("回答を生成できませんでした")
 	}
