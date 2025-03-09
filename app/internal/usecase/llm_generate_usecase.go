@@ -70,39 +70,94 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	// 4. 質問ごとに回答を生成
-	answers := make([]model.LLMGeneratedResponse, 0, len(questions))
+	var wg sync.WaitGroup
+
+	type indexedResponse struct {
+		index int
+		resp  model.LLMGeneratedResponse
+	}
+	responseCh := make(chan indexedResponse, len(questions))
+	errorCh := make(chan error, len(questions))
 
 	llmModel := model.GeminiFlashLite
 	if model.LLMModel(req.Model) != "" {
 		llmModel = model.LLMModel(req.Model)
 	}
 
-	for _, question := range questions {
-		// プロンプトを作成
-		prompt := u.buildPrompt(question, companyInfo, &experience, req.Company)
+	for i, question := range questions {
+		wg.Add(1)
+		go func(idx int, q string) {
+			defer func() {
+				if r := recover(); r != nil {
+					errorCh <- fmt.Errorf("質問「%s」の処理中にパニックが発生: %v", q, r)
+					wg.Done()
+				}
+			}()
 
-		// LLMで回答を生成
-		llmInput := model.GeminiInput{
-			Model: llmModel,
-			Text:  prompt,
-		}
+			defer wg.Done()
 
-		geminiResponse, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
-		if err != nil {
-			log.Printf("質問「%s」への回答生成に失敗: %v", question, err)
-			continue
-		}
+			type apiResponse struct {
+				response model.GeminiResponse
+				err      error
+			}
+			resultCh := make(chan apiResponse, 1)
 
-		// 結果を追加
-		LLMGeneratedResponse := model.LLMGeneratedResponse{
-			Question: question,
-			Answer:   geminiResponse.Text,
-		}
-		answers = append(answers, LLMGeneratedResponse)
+			go func() {
+				prompt := u.buildPrompt(q, companyInfo, &experience, req.Company)
+				llmInput := model.GeminiInput{
+					Model: llmModel,
+					Text:  prompt,
+				}
+
+				resp, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
+				resultCh <- apiResponse{
+					response: resp,
+					err:      err,
+				}
+			}()
+
+			select {
+			case result := <-resultCh:
+				if result.err != nil {
+					errorCh <- fmt.Errorf("質問「%s」への回答生成に失敗: %v", q, result.err)
+					return
+				}
+
+				responseCh <- indexedResponse{
+					index: idx,
+					resp: model.LLMGeneratedResponse{
+						Question: q,
+						Answer:   result.response.Text,
+					},
+				}
+
+			case <-time.After(20 * time.Second):
+				errorCh <- fmt.Errorf("質問「%s」の回答生成がタイムアウトしました（20秒）", q)
+			}
+		}(i, question)
 	}
 
-	// 回答が生成できなかった場合
-	if len(answers) == 0 {
+	go func() {
+		wg.Wait()
+		close(responseCh)
+		close(errorCh)
+	}()
+
+	answers := make([]model.LLMGeneratedResponse, len(questions))
+	for i := range answers {
+		answers[i] = model.LLMGeneratedResponse{}
+	}
+	validAnswers := 0
+
+	for resp := range responseCh {
+		answers[resp.index] = resp.resp
+		validAnswers++
+	}
+
+	if validAnswers != len(questions) {
+		if err, ok := <-errorCh; ok {
+			return nil, err
+		}
 		return nil, fmt.Errorf("回答を生成できませんでした")
 	}
 
