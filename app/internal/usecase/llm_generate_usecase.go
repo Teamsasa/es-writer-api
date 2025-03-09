@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -170,18 +171,11 @@ func (u *llmGenerateUsecase) extractQuestionsFromHTML(c echo.Context, html strin
 		return nil, fmt.Errorf("HTMLが空です")
 	}
 
-	// Gemini用のプロンプトを構築
-	prompt := `以下のHTMLはエントリーシート(ES)の入力フォームです。
-このHTMLから入力欄に対応する質問文を抽出し、リストアップしてください。
-質問に文字数制限がある場合は、「（300字以内）」のような形で質問文の末尾に追加してください。
-質問のみをシンプルに抽出し、各質問の間には*#*を必ず挿入してください。
-質問文には、質問番号やIDやHTMLタグなどは含めないでください。
-
-例：
-志望動機を教えてください。（400字以内）*#*学生時代に力を入れたことは何ですか？（300字以内）*#*あなたの強みを教えてください。
-
-以下のHTMLを分析してください:
-` + html
+	promptTemplate, err := loadPromptFromFile("extract_questions.txt")
+	if err != nil {
+		return nil, fmt.Errorf("プロンプトファイルの読み込みに失敗: %v", err)
+	}
+	prompt := promptTemplate + html
 
 	// Gemini APIを呼び出す
 	geminiInput := model.GeminiInput{
@@ -211,9 +205,15 @@ func (u *llmGenerateUsecase) extractQuestionsFromHTML(c echo.Context, html strin
 }
 
 func (u *llmGenerateUsecase) buildPrompt(question string, companyInfo *model.CompanyInfo, experience *model.Experiences, companyName string) string {
+	promptTemplate, err := loadPromptFromFile("es_generation.txt")
+	if err != nil {
+		log.Printf("プロンプトファイルの読み込みに失敗: %v, デフォルトのプロンプトを使用します", err)
+		return fmt.Sprintf("企業%sについての質問です。一般的な応募者として回答してください。\n\n%s", companyName, question)
+	}
+
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("あなたはエントリーシートのプロ作成者です。以下の質問に回答してください：「%s」\n\n", question))
+	sb.WriteString(fmt.Sprintf(promptTemplate, question))
 
 	// 企業情報の追加
 	sb.WriteString("【企業情報】\n")
@@ -267,29 +267,26 @@ func (u *llmGenerateUsecase) buildPrompt(question string, companyInfo *model.Com
 		}
 	}
 
-	sb.WriteString("【回答作成の重要なガイドライン】\n")
-	sb.WriteString("1. 日本語のみを使用し、外国語や特殊な記号（アスタリスク*, 波ダッシュ~, ハット^ など）は一切使用しないでください\n")
-	sb.WriteString("2. 具体例や部活動名、数値などを示す際も、記号で囲まずに自然な文章で書いてください\n")
-	sb.WriteString("3. 箇条書きやマークダウン記法は使用せず、通常の文章として書いてください\n")
-	sb.WriteString("4. 「〜です。〜ます。」といった丁寧な文体を一貫して使用してください\n")
-	sb.WriteString("5. 質問文や「自己PRは以下の通りです」などの形式的な表現は回答に含めないでください\n")
-	sb.WriteString("6. 企業名や企業理念の過度な繰り返しを避け、自然な頻度で言及してください\n")
-	sb.WriteString("7. 具体的なエピソードや経験を含め、説得力のある内容にしてください\n")
-	sb.WriteString("8. 「〜と思います」「〜と考えます」「〜できると思います」など、主観的で自然な表現を適切に使ってください\n")
-	sb.WriteString("9. 専門用語の使用は適度に控え、一般的な表現を心がけてください\n")
-	sb.WriteString("10. 起承転結を意識した、読みやすく自然な文章構成にしてください\n")
-
-	sb.WriteString("11. 出力前に回答の文字数をカウントして、文字数制限を超えていたら再度回答を作り直してください\n")
-	sb.WriteString("12. 実際の文字数が文字数制限に近づくようにしてください（少なすぎても不自然です）\n")
-
-	// 最終出力についての指示
-	sb.WriteString("\n【最終出力の注意事項】\n")
-	sb.WriteString("・特殊記号や外国語を含まない、純粋な日本語の文章を出力してください\n")
-	sb.WriteString("・アスタリスク(*)や他の記号で強調したり囲んだりしないでください\n")
-	sb.WriteString("・回答文のみを出力し、質問の繰り返しや前置き・説明は含めないでください\n")
-	sb.WriteString("・空行は段落の区切りのみに使用し、冒頭や末尾の余計な空行は入れないでください\n")
-
 	return sb.String()
+}
+
+func loadPromptFromFile(filename string) (string, error) {
+	paths := []string{
+		filename,
+		filepath.Join("../../internal/usecase/prompts", filename),
+	}
+
+	var content []byte
+	var err error
+
+	for _, path := range paths {
+		content, err = os.ReadFile(path)
+		if err == nil {
+			return string(content), nil
+		}
+	}
+
+	return "", err
 }
 
 func (u *llmGenerateUsecase) getCompanyInfo(ctx context.Context, companyName string) (*model.CompanyInfo, error) {
