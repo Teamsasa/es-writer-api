@@ -87,6 +87,13 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	for i, question := range questions {
 		wg.Add(1)
 		go func(idx int, q string) {
+			defer func() {
+				if r := recover(); r != nil {
+					errorCh <- fmt.Errorf("質問「%s」の処理中にパニックが発生: %v", q, r)
+					wg.Done()
+				}
+			}()
+
 			defer wg.Done()
 
 			type apiResponse struct {
