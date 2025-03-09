@@ -45,7 +45,7 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),	
+			"error": err.Error(),
 		})
 	}
 
