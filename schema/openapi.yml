@@ -86,6 +86,51 @@ paths:
                 $ref: '#/components/schemas/InternalServerErrorSchema'
               example:
                 error: Internal Server Error
+  /api/companies/search:
+    get:
+      summary: search companies by name
+      tags:
+        - company
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Company name to search for
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanyBasicInfo'
+        "400":
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+              example:
+                error: keyword is required
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedErrorSchema'
+              example:
+                error: Unauthorized
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorSchema'
+              example:
+                error: Internal Server Error
   /api/generate:
     post:
       summary: generate user experience
@@ -232,6 +277,17 @@ components:
                 type: string
               answer:
                 type: string
+    CompanyBasicInfo:
+      type: object
+      properties:
+        corporate_number:
+          type: string
+          description: Company legal number
+          example: "1234567890123"
+        name:
+          type: string
+          description: Company name
+          example: 株式会社テスト
     UnauthorizedErrorSchema:
       type: object
       properties:
@@ -246,6 +302,13 @@ components:
           type: string
           description: Error message
           example: Not Found
+    BadRequestErrorSchema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: keyword is required
     InternalServerErrorSchema:
       type: object
       properties:
