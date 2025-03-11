@@ -144,9 +144,6 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}()
 
 	answers := make([]model.LLMGeneratedResponse, len(questions))
-	for i := range answers {
-		answers[i] = model.LLMGeneratedResponse{}
-	}
 	validAnswers := 0
 
 	for resp := range responseCh {
