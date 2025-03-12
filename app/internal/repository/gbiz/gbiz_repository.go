@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"time"
 
 	"es-api/app/internal/entity/model"
 
@@ -49,7 +48,7 @@ func (r *gbizInfoRepository) SearchCompanies(c echo.Context, keyword string) ([]
 	req.Header.Set("X-hojinInfo-api-token", apiKey)
 
 	// リクエストの実行
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
