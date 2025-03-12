@@ -96,20 +96,11 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 
 			defer wg.Done()
 
-			genCtx, genCancel := context.WithTimeout(c.Request().Context(), 15*time.Second)
-			defer genCancel()
-
-			ctx := c.Echo().NewContext(
-				c.Request().WithContext(genCtx),
-				c.Response(),
-			)
-
 			type apiResponse struct {
 				response model.GeminiResponse
 				err      error
 			}
 			resultCh := make(chan apiResponse, 1)
-			doneCh := make(chan struct{})
 
 			go func() {
 				prompt := u.buildPrompt(q, companyInfo, &experience, req.Company)
@@ -118,17 +109,16 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 					Text:  prompt,
 				}
 
-				resp, err := u.geminiRepo.GetGeminiRequest(ctx, llmInput)
+				resp, err := u.geminiRepo.GetGeminiRequest(c, llmInput)
 
 				select {
-				case <-genCtx.Done():
+				case <-ctx.Done():
 					return
 				default:
 					resultCh <- apiResponse{
 						response: resp,
 						err:      err,
 					}
-					close(doneCh)
 				}
 			}()
 
@@ -147,8 +137,8 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 					},
 				}
 
-			case <-genCtx.Done():
-				errorCh <- fmt.Errorf("質問「%s」の回答生成がタイムアウトまたはキャンセルされました: %v", q, genCtx.Err())
+			case <-ctx.Done():
+				errorCh <- fmt.Errorf("質問「%s」の回答生成がタイムアウトまたはキャンセルされました: %v", q, ctx.Err())
 			}
 		}(i, question)
 	}
