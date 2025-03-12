@@ -23,9 +23,10 @@ type LLMGenerateUsecase interface {
 
 // llmGenerateUsecase はLLMGenerateUsecaseの実装
 type llmGenerateUsecase struct {
-	geminiRepo      gemini.GeminiRepository
-	companyInfoRepo tavily.TavilyRepository
-	experienceRepo  db.ExperienceRepository
+	geminiRepo          gemini.GeminiRepository
+	companyInfoRepo     tavily.TavilyRepository
+	experienceRepo      db.ExperienceRepository
+	companyResearchRepo db.CompanyResearchRepository
 }
 
 // NewLLMGenerateUsecase は新しいLLMGenerateUsecaseを作成
@@ -33,11 +34,13 @@ func NewLLMGenerateUsecase(
 	geminiRepo gemini.GeminiRepository,
 	companyInfoRepo tavily.TavilyRepository,
 	experienceRepo db.ExperienceRepository,
+	companyResearchRepo db.CompanyResearchRepository,
 ) LLMGenerateUsecase {
 	return &llmGenerateUsecase{
-		geminiRepo:      geminiRepo,
-		companyInfoRepo: companyInfoRepo,
-		experienceRepo:  experienceRepo,
+		geminiRepo:          geminiRepo,
+		companyInfoRepo:     companyInfoRepo,
+		experienceRepo:      experienceRepo,
+		companyResearchRepo: companyResearchRepo,
 	}
 }
 
@@ -53,10 +56,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	// 2. 企業情報を取得
-	ctx, cancel := context.WithTimeout(c.Request().Context(), 20*time.Second)
-	defer cancel()
-
-	companyInfo, err := u.getCompanyInfo(ctx, req.Company)
+	companyInfo, err := u.getCompanyInfo(c, req.CompanyID, req.CompanyName)
 	if err != nil {
 		// 企業情報がなくても回答を生成したいので、エラーはログに記録するのみ
 		log.Printf("企業情報の取得に失敗しました: %v", err)
@@ -79,7 +79,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 
 	for _, question := range questions {
 		// プロンプトを作成
-		prompt := u.buildPrompt(question, companyInfo, &experience, req.Company)
+		prompt := u.buildPrompt(question, companyInfo, &experience, req.CompanyName)
 
 		// LLMで回答を生成
 		llmInput := model.GeminiInput{
@@ -237,7 +237,24 @@ func (u *llmGenerateUsecase) buildPrompt(question string, companyInfo *model.Com
 	return sb.String()
 }
 
-func (u *llmGenerateUsecase) getCompanyInfo(ctx context.Context, companyName string) (*model.CompanyInfo, error) {
+func (u *llmGenerateUsecase) getCompanyInfo(c echo.Context, companyID string, companyName string) (*model.CompanyInfo, error) {
+	// キャッシュから企業情報を検索
+	research, err := u.companyResearchRepo.FindByCompanyID(c, companyID)
+	if err != nil {
+		return nil, fmt.Errorf("企業情報のキャッシュ検索中にエラーが発生しました: %w", err)
+	}
+
+	// キャッシュがある場合はそれを返す
+	if research != nil {
+		log.Printf("企業情報のキャッシュを利用します: %s", research.CompanyName)
+		return &model.CompanyInfo{
+			Name:        research.CompanyName,
+			Philosophy:  research.Philosophy,
+			CareerPath:  research.CareerPath,
+			TalentNeeds: research.TalentNeeds,
+		}, nil
+	}
+
 	// APIキーを設定
 	apiKey := os.Getenv("TAVILY_API_KEY")
 	if apiKey == "" {
@@ -245,9 +262,24 @@ func (u *llmGenerateUsecase) getCompanyInfo(ctx context.Context, companyName str
 	}
 
 	// 企業情報を検索
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 20*time.Second)
+	defer cancel()
+
 	companyInfo, err := u.searchCompanyInfoParallel(ctx, apiKey, companyName)
 	if err != nil {
 		return nil, fmt.Errorf("企業情報の検索中にエラーが発生しました: %w", err)
+	}
+
+	// 検索結果をキャッシュに保存
+	research = &model.CompanyResearch{
+		CompanyID:   companyID,
+		CompanyName: companyName,
+		Philosophy:  companyInfo.Philosophy,
+		CareerPath:  companyInfo.CareerPath,
+		TalentNeeds: companyInfo.TalentNeeds,
+	}
+	if err := u.companyResearchRepo.Create(c, research); err != nil {
+		log.Printf("企業情報のキャッシュ保存中にエラーが発生しました: %v", err)
 	}
 
 	return companyInfo, nil

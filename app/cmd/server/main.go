@@ -24,6 +24,7 @@ func main() {
 	}
 	dbConnManager := db.NewDBConnectionManager()
 	experienceRepository := dbRepo.NewExperienceRepositoryWithDBManager(dbConnManager)
+	companyResearchRepository := dbRepo.NewCompanyResearchRepositoryWithDBManager(dbConnManager)
 	clerkAuthRepository := clerkRepo.NewClerkAuthRepository()
 	geminiRepository := geminiRepo.NewGeminiRepository()
 	tavilyRepository := tavilyRepo.NewTavilyRepository()
@@ -34,6 +35,7 @@ func main() {
 		geminiRepository,
 		tavilyRepository,
 		experienceRepository,
+		companyResearchRepository,
 	)
 	experienceHandler := handler.NewExperienceHandler(experienceUsecase)
 	llmGenerateHandler := handler.NewLLMGenerateHandler(llmGenerateUsecase)

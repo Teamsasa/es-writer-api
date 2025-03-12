@@ -218,10 +218,14 @@ components:
     InputGenerateSchema:
       type: object
       properties:
-        company:
+        companyName:
           type: string
           description: Company name
-          example: 株式会社DeNA
+          example: 株式会社ディー・エヌ・エー
+        companyId:
+          type: string
+          description: Company legal number
+          example: "4011001032721"
         model:
           type: string
           description: LLM model
