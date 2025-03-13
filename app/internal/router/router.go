@@ -11,6 +11,7 @@ import (
 func NewRouter(
 	eh handler.ExperienceHandler,
 	gh handler.LLMGenerateHandler,
+	ch handler.CompanyHandler,
 	authMiddleware echo.MiddlewareFunc,
 ) *echo.Echo {
 	e := echo.New()
@@ -22,6 +23,7 @@ func NewRouter(
 	api.GET("/experience", eh.GetExperienceByUserID)
 	api.POST("/experience", eh.PostExperience)
 	api.POST("/generate", gh.Generate)
+	api.GET("/companies/search", ch.SearchCompanies)
 
 	return e
 }
