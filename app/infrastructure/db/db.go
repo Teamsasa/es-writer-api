@@ -121,4 +121,6 @@ func NewTestDB() *gorm.DB {
 
 func CleanupTestDB(db *gorm.DB) {
 	db.Exec("DELETE FROM users")
+	db.Exec("DELETE FROM experiences")
+	db.Exec("DELETE FROM company_researches")
 }
