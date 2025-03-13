@@ -284,11 +284,11 @@ components:
     CompanyBasicInfo:
       type: object
       properties:
-        corporate_number:
+        companyId:
           type: string
           description: Company legal number
           example: "1234567890123"
-        name:
+        companyName:
           type: string
           description: Company name
           example: 株式会社テスト
