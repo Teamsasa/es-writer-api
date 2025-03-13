@@ -16,8 +16,8 @@ type CompanyResearch struct {
 
 // CompanyBasicInfo - 企業検索結果用の基本情報
 type CompanyBasicInfo struct {
-	CompanyID   string `json:"corporate_number"` // 法人番号
-	CompanyName string `json:"name"`             // 企業名
+	CompanyID   string `json:"companyId"`
+	CompanyName string `json:"companyName"`
 }
 
 // GBizInfoResponse - gBizINFO APIのレスポンス

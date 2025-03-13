@@ -39,6 +39,7 @@ jobs:
         DB_PORT=${{ secrets.DB_PORT }}
         CLERK_JWKS_URL=${{ secrets.CLERK_JWKS_URL }}
         GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+        GBIZ_API_KEY=${{ secrets.GBIZ_API_KEY }}
         EOF
 
     - name: Build
