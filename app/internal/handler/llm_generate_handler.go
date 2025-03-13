@@ -34,8 +34,8 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 		})
 	}
 
-	if req.Company == "" || req.HTML == "" {
-		log.Printf("必須パラメータ不足: company=%v, html=%v", req.Company != "", req.HTML != "")
+	if req.CompanyName == "" || req.CompanyID == "" || req.HTML == "" {
+		log.Printf("必須パラメータ不足: companyName=%v, companyID=%v, html=%v", req.CompanyName != "", req.CompanyID != "", req.HTML != "")
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "必要なパラメータが不足しています",
 		})

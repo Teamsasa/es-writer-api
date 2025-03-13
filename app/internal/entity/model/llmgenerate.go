@@ -6,8 +6,9 @@ type LLMGeneratedResponse struct {
 }
 
 type LLMGenerateRequest struct {
-	Questions []string `json:"questions"`
-	Company   string   `json:"company"`
-	HTML      string   `json:"html"`
-	Model     string   `json:"model"`
+	Questions   []string `json:"questions"`
+	CompanyName string   `json:"companyName"`
+	CompanyID   string   `json:"companyId"`
+	HTML        string   `json:"html"`
+	Model       string   `json:"model"`
 }

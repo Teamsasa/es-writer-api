@@ -17,5 +17,9 @@ func RunMigrations(db *gorm.DB) {
 	if err != nil {
 		log.Fatalf("🔴 Error migrating Experience model: %s", err)
 	}
-	log.Println("🟢 User and Experience models migrated")
+	err = db.AutoMigrate(&model.CompanyResearch{})
+	if err != nil {
+		log.Fatalf("🔴 Error migrating CompanyResearch model: %s", err)
+	}
+	log.Println("🟢 Migrations completed")
 }
