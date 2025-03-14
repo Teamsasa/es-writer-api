@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -31,7 +32,9 @@ func (h *companyHandler) SearchCompanies(c echo.Context) error {
 		})
 	}
 
-	companies, err := h.companyUsecase.SearchCompanies(c, keyword)
+	ctx := c.Request().Context()
+	ctx = context.WithValue(ctx, "keyword", keyword)
+	companies, err := h.companyUsecase.SearchCompanies(ctx, keyword)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Sprintf("failed to search companies: %v", err),

@@ -1,18 +1,18 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"es-api/app/internal/entity/model"
 
 	"github.com/google/generative-ai-go/genai"
-	"github.com/labstack/echo/v4"
 	"google.golang.org/api/option"
 )
 
 type GeminiRepository interface {
-	GetGeminiRequest(c echo.Context, input model.GeminiInput) (model.GeminiResponse, error)
+	GetGeminiRequest(ctx context.Context, input model.GeminiInput) (model.GeminiResponse, error)
 }
 
 type geminiRepository struct{}
@@ -21,8 +21,8 @@ func NewGeminiRepository() GeminiRepository {
 	return &geminiRepository{}
 }
 
-func (r *geminiRepository) GetGeminiRequest(c echo.Context, input model.GeminiInput) (model.GeminiResponse, error) {
-	client, err := genai.NewClient(c.Request().Context(), option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+func (r *geminiRepository) GetGeminiRequest(ctx context.Context, input model.GeminiInput) (model.GeminiResponse, error) {
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		return model.GeminiResponse{}, err
 	}
@@ -31,7 +31,7 @@ func (r *geminiRepository) GetGeminiRequest(c echo.Context, input model.GeminiIn
 	gemModel := client.GenerativeModel(string(input.Model))
 	text := input.Text
 
-	response, err := gemModel.GenerateContent(c.Request().Context(), genai.Text(text))
+	response, err := gemModel.GenerateContent(ctx, genai.Text(text))
 	if err != nil {
 		return model.GeminiResponse{}, err
 	}

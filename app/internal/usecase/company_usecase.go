@@ -1,14 +1,14 @@
 package usecase
 
 import (
+	"context"
+
 	"es-api/app/internal/entity/model"
 	"es-api/app/internal/repository/gbiz"
-
-	"github.com/labstack/echo/v4"
 )
 
 type CompanyUsecase interface {
-	SearchCompanies(c echo.Context, keyword string) ([]model.CompanyBasicInfo, error)
+	SearchCompanies(ctx context.Context, keyword string) ([]model.CompanyBasicInfo, error)
 }
 
 type companyUsecase struct {
@@ -21,6 +21,6 @@ func NewCompanyUsecase(gbizRepo gbiz.GBizInfoRepository) CompanyUsecase {
 	}
 }
 
-func (u *companyUsecase) SearchCompanies(c echo.Context, keyword string) ([]model.CompanyBasicInfo, error) {
-	return u.gbizRepo.SearchCompanies(c, keyword)
+func (u *companyUsecase) SearchCompanies(ctx context.Context, keyword string) ([]model.CompanyBasicInfo, error) {
+	return u.gbizRepo.SearchCompanies(ctx, keyword)
 }
