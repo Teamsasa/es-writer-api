@@ -21,7 +21,7 @@ func TestExperienceRepository_GetExperienceByUserID(t *testing.T) {
 	t.Run("異常系:ユーザーが存在しない場合", func(t *testing.T) {
 		_ = factory.CreateUser2(t, db)
 
-		ctx := context.Background()
+		ctx := test.SetupContextContext("test-user-id")
 		ctx = context.WithValue(ctx, "userID", factory.DummyUserID1)
 		experience, err := repo.GetExperienceByUserID(ctx)
 
@@ -33,7 +33,7 @@ func TestExperienceRepository_GetExperienceByUserID(t *testing.T) {
 		dummyUser := factory.CreateUser1(t, db)
 		dummyExperience := factory.CreateExperience1(t, db)
 
-		ctx := context.Background()
+		ctx := test.SetupContextContext("test-user-id")
 		ctx = context.WithValue(ctx, "userID", dummyUser.ID)
 		res, err := repo.GetExperienceByUserID(ctx)
 
@@ -50,7 +50,7 @@ func TestExperienceRepository_FindExperienceByUserID(t *testing.T) {
 	dummyUser := factory.CreateUser1(t, db)
 
 	t.Run("異常系:経験が存在しない場合", func(t *testing.T) {
-		ctx := context.Background()
+		ctx := test.SetupContextContext("test-user-id")
 		ctx = context.WithValue(ctx, "userID", dummyUser.ID)
 		res, err := repo.FindExperienceByUserID(ctx)
 
@@ -61,7 +61,7 @@ func TestExperienceRepository_FindExperienceByUserID(t *testing.T) {
 	t.Run("正常系:経験が存在する場合", func(t *testing.T) {
 		_ = factory.CreateExperience1(t, db)
 
-		ctx := context.Background()
+		ctx := test.SetupContextContext("test-user-id")
 		ctx = context.WithValue(ctx, "userID", dummyUser.ID)
 		res, err := repo.FindExperienceByUserID(ctx)
 
@@ -85,7 +85,7 @@ func TestExperienceRepository_PostExperience(t *testing.T) {
 			FutureGoals: "test-future-goals",
 		}
 
-		ctx := context.Background()
+		ctx := test.SetupContextContext("test-user-id")
 		ctx = context.WithValue(ctx, "userID", dummyUser.ID)
 		experience, err := repo.PostExperience(ctx, input)
 
@@ -114,7 +114,7 @@ func TestExperienceRepository_PatchExperience(t *testing.T) {
 			FutureGoals: "updated-future-goals",
 		}
 
-		ctx := context.Background()
+		ctx := test.SetupContextContext("test-user-id")
 		ctx = context.WithValue(ctx, "userID", dummyUser.ID)
 		experience, err := repo.PatchExperience(ctx, input)
 
