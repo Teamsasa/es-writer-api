@@ -1,10 +1,10 @@
 package usecase_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	testifymock "github.com/stretchr/testify/mock"
 
@@ -24,8 +24,7 @@ func TestCompanyUsecase_SearchCompanies(t *testing.T) {
 			},
 		}
 
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		keyword := "株式会社テスト"
 
 		mockRepo.On("SearchCompanies", testifymock.Anything, keyword).Return(expectedCompanies, nil)
@@ -43,9 +42,7 @@ func TestCompanyUsecase_SearchCompanies(t *testing.T) {
 
 	t.Run("正常系:検索結果が空の場合", func(t *testing.T) {
 		mockRepo := new(mock.GBizInfoRepositoryMock)
-
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		keyword := "存在しない会社"
 
 		mockRepo.On("SearchCompanies", testifymock.Anything, keyword).Return([]model.CompanyBasicInfo{}, nil)
@@ -62,8 +59,7 @@ func TestCompanyUsecase_SearchCompanies(t *testing.T) {
 	t.Run("異常系:リポジトリでエラーが発生した場合", func(t *testing.T) {
 		mockRepo := new(mock.GBizInfoRepositoryMock)
 
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		keyword := "エラーケース"
 		expectedErr := errors.New("repository error")
 

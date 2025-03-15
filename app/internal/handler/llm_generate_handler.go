@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -41,7 +42,13 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 		})
 	}
 
-	result, err := h.llmenerateUsecase.LLMGenerate(c, *req)
+	ctx := c.Request().Context()
+	idp := c.Request().Header.Get("idp")
+	userID := c.Get("userID")
+	ctx = context.WithValue(ctx, "idp", idp)
+	ctx = context.WithValue(ctx, "userID", userID)
+
+	result, err := h.llmenerateUsecase.LLMGenerate(ctx, *req)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
