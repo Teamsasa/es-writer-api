@@ -2,7 +2,7 @@ package mock
 
 import (
 	"context"
-	
+
 	"es-api/app/internal/entity/model"
 
 	"github.com/stretchr/testify/mock"
