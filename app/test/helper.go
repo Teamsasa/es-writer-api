@@ -1,13 +1,11 @@
 package test
 
 import (
+	"context"
 	"log"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 
 	"es-api/app/infrastructure/db"
@@ -39,12 +37,9 @@ func CleanupDB(t *testing.T, dbConn *gorm.DB) {
 	sqlDB.Close()
 }
 
-func SetupEchoContext(userID string) echo.Context {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	req.Header.Set("idp", "test")
-	ctx := e.NewContext(req, rec)
-	ctx.Set("userID", userID)
+func SetupContextContext(userID string) context.Context {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "userID", userID)
+	ctx = context.WithValue(ctx, "idp", "test")
 	return ctx
 }
