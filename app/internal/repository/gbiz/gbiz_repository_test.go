@@ -18,7 +18,7 @@ func TestGBizInfoRepository(t *testing.T) {
 				// 環境変数のセットアップ
 				t.Setenv("GBIZ_API_KEY", "dummy-api-key")
 
-				ctx := test.SetupEchoContext("")
+				ctx := test.SetupContextContext("")
 				keyword := "テスト株式会社"
 				expected := []model.CompanyBasicInfo{
 					{
@@ -43,7 +43,7 @@ func TestGBizInfoRepository(t *testing.T) {
 				// 環境変数のセットアップ
 				t.Setenv("GBIZ_API_KEY", "")
 
-				ctx := test.SetupEchoContext("")
+				ctx := test.SetupContextContext("")
 				keyword := "テスト株式会社"
 
 				// モックを使用したテスト
@@ -60,7 +60,7 @@ func TestGBizInfoRepository(t *testing.T) {
 				// 環境変数のセットアップ
 				t.Setenv("GBIZ_API_KEY", "dummy-api-key")
 
-				ctx := test.SetupEchoContext("")
+				ctx := test.SetupContextContext("")
 				keyword := "テスト株式会社"
 
 				// モックを使用したテスト
