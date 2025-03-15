@@ -1,11 +1,11 @@
 package usecase_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	testifymock "github.com/stretchr/testify/mock"
 
@@ -24,8 +24,7 @@ func TestExperienceUsecase_GetExperienceByUserID(t *testing.T) {
 			UpdatedAt: time.Now(),
 		}
 
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		mockRepo.On("GetExperienceByUserID", testifymock.Anything).Return(experience, nil)
 
 		uc := usecase.NewExperienceUsecase(mockRepo)
@@ -41,8 +40,7 @@ func TestExperienceUsecase_GetExperienceByUserID(t *testing.T) {
 	t.Run("異常系:ユーザーが存在しない場合", func(t *testing.T) {
 		mockRepo := new(appmock.ExperienceRepositoryMock)
 
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		expectedErr := errors.New("repository error")
 		mockRepo.On("GetExperienceByUserID", testifymock.Anything).Return(model.Experiences{}, expectedErr)
 
@@ -79,8 +77,7 @@ func TestExperienceUsecase_PostExperience(t *testing.T) {
 			UpdatedAt:   time.Now(),
 		}
 
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		mockRepo.On("FindExperienceByUserID", testifymock.Anything).Return(false, nil)
 		mockRepo.On("PostExperience", testifymock.Anything, inputExperience).Return(createdExperience, nil)
 
@@ -119,8 +116,7 @@ func TestExperienceUsecase_PostExperience(t *testing.T) {
 			UpdatedAt:   time.Now(),
 		}
 
-		e := echo.New()
-		ctx := e.NewContext(nil, nil)
+		ctx := context.Background()
 		mockRepo.On("FindExperienceByUserID", testifymock.Anything).Return(true, nil)
 		mockRepo.On("PatchExperience", testifymock.Anything, inputExperience).Return(updatedExperience, nil)
 
