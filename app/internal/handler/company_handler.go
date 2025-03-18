@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"es-api/app/internal/usecase"
+	"es-api/app/internal/contextKey"
 )
 
 type CompanyHandler interface {
@@ -33,7 +34,7 @@ func (h *companyHandler) SearchCompanies(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	ctx = context.WithValue(ctx, "keyword", keyword)
+	ctx = context.WithValue(ctx, contextKey.KeywordKey, keyword)
 	companies, err := h.companyUsecase.SearchCompanies(ctx, keyword)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{

@@ -8,6 +8,7 @@ import (
 
 	"es-api/app/infrastructure/db"
 	"es-api/app/internal/entity/model"
+	"es-api/app/internal/contextKey"
 )
 
 type ExperienceRepository interface {
@@ -37,8 +38,8 @@ func NewExperienceRepositoryWithDBManager(dbManager db.DBConnectionManager) Expe
 
 func (r *experienceRepository) GetExperienceByUserID(ctx context.Context) (model.Experiences, error) {
 	var experience model.Experiences
-	idp := ctx.Value("idp").(string)
-	userID := ctx.Value("userID").(string)
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -54,8 +55,8 @@ func (r *experienceRepository) GetExperienceByUserID(ctx context.Context) (model
 
 func (r *experienceRepository) FindExperienceByUserID(ctx context.Context) (bool, error) {
 	var experience model.Experiences
-	idp := ctx.Value("idp").(string)
-	userID := ctx.Value("userID").(string)
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -73,8 +74,8 @@ func (r *experienceRepository) FindExperienceByUserID(ctx context.Context) (bool
 }
 
 func (r *experienceRepository) PostExperience(ctx context.Context, input model.InputExperience) (model.Experiences, error) {
-	idp := ctx.Value("idp").(string)
-	userID := ctx.Value("userID").(string)
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -97,8 +98,8 @@ func (r *experienceRepository) PostExperience(ctx context.Context, input model.I
 }
 
 func (r *experienceRepository) PatchExperience(ctx context.Context, input model.InputExperience) (model.Experiences, error) {
-	idp := ctx.Value("idp").(string)
-	userID := ctx.Value("userID").(string)
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)

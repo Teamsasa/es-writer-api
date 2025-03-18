@@ -10,6 +10,7 @@ import (
 
 	"es-api/app/infrastructure/db"
 	"es-api/app/infrastructure/migrate"
+	"es-api/app/internal/contextKey"
 )
 
 func LoadEnvFile(t *testing.T, path string) {
@@ -39,7 +40,7 @@ func CleanupDB(t *testing.T, dbConn *gorm.DB) {
 
 func SetupContextContext(userID string) context.Context {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "userID", userID)
-	ctx = context.WithValue(ctx, "idp", "test")
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
+	ctx = context.WithValue(ctx, contextKey.IDPKey, "test")
 	return ctx
 }

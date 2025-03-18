@@ -5,6 +5,7 @@ import (
 
 	"es-api/app/infrastructure/db"
 	"es-api/app/internal/entity/model"
+	"es-api/app/internal/contextKey"
 
 	"gorm.io/gorm"
 )
@@ -34,7 +35,7 @@ func NewCompanyResearchRepositoryWithDBManager(dbManager db.DBConnectionManager)
 
 // FindByCompanyID - 法人番号で企業情報を検索
 func (r *companyResearchRepository) FindByCompanyID(ctx context.Context, companyID string) (*model.CompanyResearch, error) {
-	idp := ctx.Value("idp").(string)
+	idp := ctx.Value(contextKey.IDPKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -55,7 +56,7 @@ func (r *companyResearchRepository) FindByCompanyID(ctx context.Context, company
 
 // Create - 企業情報を新規作成
 func (r *companyResearchRepository) Create(ctx context.Context, research *model.CompanyResearch) error {
-	idp := ctx.Value("idp").(string)
+	idp := ctx.Value(contextKey.IDPKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)

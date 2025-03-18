@@ -8,6 +8,7 @@ import (
 
 	"es-api/app/internal/entity/model"
 	"es-api/app/internal/usecase"
+	"es-api/app/internal/contextKey"
 )
 
 type ExperienceHandler interface {
@@ -27,8 +28,8 @@ func (h *experienceHandler) GetExperienceByUserID(c echo.Context) error {
 	ctx := c.Request().Context()
 	idp := c.Request().Header.Get("idp")
 	userID := c.Get("userID")
-	ctx = context.WithValue(ctx, "idp", idp)
-	ctx = context.WithValue(ctx, "userID", userID)
+	ctx = context.WithValue(ctx, contextKey.IDPKey, idp)
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
 	experience, err := h.eu.GetExperienceByUserID(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -44,8 +45,8 @@ func (h *experienceHandler) PostExperience(c echo.Context) error {
 	ctx := c.Request().Context()
 	idp := c.Request().Header.Get("idp")
 	userID := c.Get("userID")
-	ctx = context.WithValue(ctx, "idp", idp)
-	ctx = context.WithValue(ctx, "userID", userID)
+	ctx = context.WithValue(ctx, contextKey.IDPKey, idp)
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
 	experience, err := h.eu.PostExperience(ctx, inputExperience)
 
 	if err != nil {

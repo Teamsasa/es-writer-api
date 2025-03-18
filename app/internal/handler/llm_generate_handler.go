@@ -9,6 +9,8 @@ import (
 	"es-api/app/internal/usecase"
 
 	"github.com/labstack/echo/v4"
+
+	"es-api/app/internal/contextKey"
 )
 
 type LLMGenerateHandler interface {
@@ -45,8 +47,8 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 	ctx := c.Request().Context()
 	idp := c.Request().Header.Get("idp")
 	userID := c.Get("userID")
-	ctx = context.WithValue(ctx, "idp", idp)
-	ctx = context.WithValue(ctx, "userID", userID)
+	ctx = context.WithValue(ctx, contextKey.IDPKey, idp)
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
 
 	result, err := h.llmenerateUsecase.LLMGenerate(ctx, *req)
 
