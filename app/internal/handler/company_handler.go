@@ -7,8 +7,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"es-api/app/internal/usecase"
 	"es-api/app/internal/contextKey"
+	"es-api/app/internal/usecase"
 )
 
 type CompanyHandler interface {

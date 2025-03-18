@@ -1,10 +1,13 @@
 package contextKey
 
-type userIDKey struct {}
+type userIDKey struct{}
+
 var UserIDKey = userIDKey{}
 
-type idpKey struct {}
+type idpKey struct{}
+
 var IDPKey = idpKey{}
 
-type keywordKey struct {}
+type keywordKey struct{}
+
 var KeywordKey = keywordKey{}

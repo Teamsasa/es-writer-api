@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"es-api/app/internal/entity/model"
 	"es-api/app/internal/contextKey"
+	"es-api/app/internal/entity/model"
 	repository "es-api/app/internal/repository/db"
 	"es-api/app/test"
 	"es-api/app/test/factory"
