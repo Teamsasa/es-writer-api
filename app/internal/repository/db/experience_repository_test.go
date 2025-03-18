@@ -23,7 +23,7 @@ func TestExperienceRepository_GetExperienceByUserID(t *testing.T) {
 		_ = factory.CreateUser2(t, db)
 
 		ctx := test.SetupContextContext("test-user-id")
-		ctx = context.WithValue(ctx, contextKey.userIDKey, factory.DummyUserID1)
+		ctx = context.WithValue(ctx, contextKey.UserIDKey, factory.DummyUserID1)
 		experience, err := repo.GetExperienceByUserID(ctx)
 
 		assert.Error(t, err)
