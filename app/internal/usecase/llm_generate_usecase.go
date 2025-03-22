@@ -14,12 +14,10 @@ import (
 	db "es-api/app/internal/repository/db"
 	gemini "es-api/app/internal/repository/gemini"
 	tavily "es-api/app/internal/repository/tavily"
-
-	"github.com/labstack/echo/v4"
 )
 
 type LLMGenerateUsecase interface {
-	LLMGenerate(c echo.Context, req model.LLMGenerateRequest) ([]model.LLMGeneratedResponse, error)
+	LLMGenerate(ctx context.Context, req model.LLMGenerateRequest) ([]model.LLMGeneratedResponse, error)
 }
 
 // llmGenerateUsecase はLLMGenerateUsecaseの実装
@@ -46,13 +44,12 @@ func NewLLMGenerateUsecase(
 }
 
 // LLMGenerate はHTMLから質問を抽出し、企業情報とユーザーの経験に基づいて回答を生成
-func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRequest) ([]model.LLMGeneratedResponse, error) {
-	// タイムアウト付きコンテキストを作成
-	ctx, cancel := context.WithTimeout(c.Request().Context(), 30*time.Second)
+func (u *llmGenerateUsecase) LLMGenerate(ctx context.Context, req model.LLMGenerateRequest) ([]model.LLMGeneratedResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	// 1. HTMLから質問を抽出
-	questions, err := u.extractQuestionsFromHTML(c, req.HTML)
+	questions, err := u.extractQuestionsFromHTML(ctx, req.HTML)
 	if err != nil {
 		return nil, fmt.Errorf("質問抽出に失敗しました: %w", err)
 	}
@@ -61,14 +58,14 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	}
 
 	// 2. 企業情報を取得
-	companyInfo, err := u.getCompanyInfo(c, req.CompanyID, req.CompanyName)
+	companyInfo, err := u.getCompanyInfo(ctx, req.CompanyID, req.CompanyName)
 	if err != nil {
 		// 企業情報がなくても回答を生成したいので、エラーはログに記録するのみ
 		log.Printf("企業情報の取得に失敗しました: %v", err)
 	}
 
 	// 3. ユーザーの経験情報をデータベースから取得
-	experience, err := u.experienceRepo.GetExperienceByUserID(c)
+	experience, err := u.experienceRepo.GetExperienceByUserID(ctx)
 	if err != nil {
 		// 経験情報がなくても回答を生成したいので、エラーはログに記録するのみ
 		log.Printf("経験情報の取得に失敗しました: %v", err)
@@ -111,7 +108,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 			var err error
 
 			go func() {
-				resp, err = u.geminiRepo.GetGeminiRequest(c, llmInput)
+				resp, err = u.geminiRepo.GetGeminiRequest(ctx, llmInput)
 				close(done)
 			}()
 
@@ -159,7 +156,7 @@ func (u *llmGenerateUsecase) LLMGenerate(c echo.Context, req model.LLMGenerateRe
 	return answers, nil
 }
 
-func (u *llmGenerateUsecase) extractQuestionsFromHTML(c echo.Context, html string) ([]string, error) {
+func (u *llmGenerateUsecase) extractQuestionsFromHTML(ctx context.Context, html string) ([]string, error) {
 	// HTMLが空の場合はエラー
 	if html == "" {
 		return nil, fmt.Errorf("HTMLが空です")
@@ -178,7 +175,7 @@ func (u *llmGenerateUsecase) extractQuestionsFromHTML(c echo.Context, html strin
 	}
 
 	// geminiリポジトリを利用して質問抽出
-	geminiResponse, err := u.geminiRepo.GetGeminiRequest(c, geminiInput)
+	geminiResponse, err := u.geminiRepo.GetGeminiRequest(ctx, geminiInput)
 	if err != nil {
 		return nil, fmt.Errorf("質問抽出エラー: %w", err)
 	}
@@ -283,9 +280,9 @@ func loadPromptFromFile(filename string) (string, error) {
 	return "", err
 }
 
-func (u *llmGenerateUsecase) getCompanyInfo(c echo.Context, companyID string, companyName string) (*model.CompanyInfo, error) {
+func (u *llmGenerateUsecase) getCompanyInfo(ctx context.Context, companyID string, companyName string) (*model.CompanyInfo, error) {
 	// キャッシュから企業情報を検索
-	research, err := u.companyResearchRepo.FindByCompanyID(c, companyID)
+	research, err := u.companyResearchRepo.FindByCompanyID(ctx, companyID)
 	if err != nil {
 		return nil, fmt.Errorf("企業情報のキャッシュ検索中にエラーが発生しました: %w", err)
 	}
@@ -308,7 +305,7 @@ func (u *llmGenerateUsecase) getCompanyInfo(c echo.Context, companyID string, co
 	}
 
 	// 企業情報を検索
-	ctx, cancel := context.WithTimeout(c.Request().Context(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 
 	companyInfo, err := u.searchCompanyInfoParallel(ctx, apiKey, companyName)
@@ -324,7 +321,7 @@ func (u *llmGenerateUsecase) getCompanyInfo(c echo.Context, companyID string, co
 		CareerPath:  companyInfo.CareerPath,
 		TalentNeeds: companyInfo.TalentNeeds,
 	}
-	if err := u.companyResearchRepo.Create(c, research); err != nil {
+	if err := u.companyResearchRepo.Create(ctx, research); err != nil {
 		log.Printf("企業情報のキャッシュ保存中にエラーが発生しました: %v", err)
 	}
 
