@@ -1,20 +1,21 @@
 package repository
 
 import (
+	"context"
 	"errors"
 
-	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 
 	"es-api/app/infrastructure/db"
+	"es-api/app/internal/contextKey"
 	"es-api/app/internal/entity/model"
 )
 
 type ExperienceRepository interface {
-	GetExperienceByUserID(c echo.Context) (model.Experiences, error)
-	FindExperienceByUserID(c echo.Context) (bool, error)
-	PostExperience(c echo.Context, input model.InputExperience) (model.Experiences, error)
-	PatchExperience(c echo.Context, input model.InputExperience) (model.Experiences, error)
+	GetExperienceByUserID(ctx context.Context) (model.Experiences, error)
+	FindExperienceByUserID(ctx context.Context) (bool, error)
+	PostExperience(ctx context.Context, input model.InputExperience) (model.Experiences, error)
+	PatchExperience(ctx context.Context, input model.InputExperience) (model.Experiences, error)
 }
 
 type experienceRepository struct {
@@ -35,10 +36,10 @@ func NewExperienceRepositoryWithDBManager(dbManager db.DBConnectionManager) Expe
 	}
 }
 
-func (r *experienceRepository) GetExperienceByUserID(c echo.Context) (model.Experiences, error) {
+func (r *experienceRepository) GetExperienceByUserID(ctx context.Context) (model.Experiences, error) {
 	var experience model.Experiences
-	idp := c.Request().Header.Get("idp")
-	userID := c.Get("userID")
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -52,10 +53,10 @@ func (r *experienceRepository) GetExperienceByUserID(c echo.Context) (model.Expe
 	return experience, nil
 }
 
-func (r *experienceRepository) FindExperienceByUserID(c echo.Context) (bool, error) {
+func (r *experienceRepository) FindExperienceByUserID(ctx context.Context) (bool, error) {
 	var experience model.Experiences
-	idp := c.Request().Header.Get("idp")
-	userID := c.Get("userID")
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -72,9 +73,9 @@ func (r *experienceRepository) FindExperienceByUserID(c echo.Context) (bool, err
 	return true, nil
 }
 
-func (r *experienceRepository) PostExperience(c echo.Context, input model.InputExperience) (model.Experiences, error) {
-	idp := c.Request().Header.Get("idp")
-	userID := c.Get("userID").(string)
+func (r *experienceRepository) PostExperience(ctx context.Context, input model.InputExperience) (model.Experiences, error) {
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)
@@ -96,9 +97,9 @@ func (r *experienceRepository) PostExperience(c echo.Context, input model.InputE
 	return experience, nil
 }
 
-func (r *experienceRepository) PatchExperience(c echo.Context, input model.InputExperience) (model.Experiences, error) {
-	idp := c.Request().Header.Get("idp")
-	userID := c.Get("userID").(string)
+func (r *experienceRepository) PatchExperience(ctx context.Context, input model.InputExperience) (model.Experiences, error) {
+	idp := ctx.Value(contextKey.IDPKey).(string)
+	userID := ctx.Value(contextKey.UserIDKey).(string)
 	var dbConn *gorm.DB
 	if r.dbManager != nil && idp != "" {
 		dbConn = r.dbManager.GetConnection(idp)

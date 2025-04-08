@@ -1,6 +1,7 @@
 package gbiz
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,12 +9,10 @@ import (
 	"os"
 
 	"es-api/app/internal/entity/model"
-
-	"github.com/labstack/echo/v4"
 )
 
 type GBizInfoRepository interface {
-	SearchCompanies(c echo.Context, keyword string) ([]model.CompanyBasicInfo, error)
+	SearchCompanies(ctx context.Context, keyword string) ([]model.CompanyBasicInfo, error)
 }
 
 type gbizInfoRepository struct {
@@ -27,7 +26,7 @@ func NewGBizInfoRepository() GBizInfoRepository {
 }
 
 // SearchCompanies - 法人名の検索を行う
-func (r *gbizInfoRepository) SearchCompanies(c echo.Context, keyword string) ([]model.CompanyBasicInfo, error) {
+func (r *gbizInfoRepository) SearchCompanies(ctx context.Context, keyword string) ([]model.CompanyBasicInfo, error) {
 	apiKey := os.Getenv("GBIZ_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("GBIZ_API_KEY is not set")

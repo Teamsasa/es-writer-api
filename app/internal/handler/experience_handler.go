@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 
+	"es-api/app/internal/contextKey"
 	"es-api/app/internal/entity/model"
 	"es-api/app/internal/usecase"
 )
@@ -23,7 +25,12 @@ func NewExperienceHandler(eu usecase.ExperienceUsecase) ExperienceHandler {
 }
 
 func (h *experienceHandler) GetExperienceByUserID(c echo.Context) error {
-	experience, err := h.eu.GetExperienceByUserID(c)
+	ctx := c.Request().Context()
+	idp := c.Request().Header.Get("idp")
+	userID := c.Get("userID")
+	ctx = context.WithValue(ctx, contextKey.IDPKey, idp)
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
+	experience, err := h.eu.GetExperienceByUserID(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -35,7 +42,12 @@ func (h *experienceHandler) PostExperience(c echo.Context) error {
 	if err := c.Bind(&inputExperience); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	experience, err := h.eu.PostExperience(c, inputExperience)
+	ctx := c.Request().Context()
+	idp := c.Request().Header.Get("idp")
+	userID := c.Get("userID")
+	ctx = context.WithValue(ctx, contextKey.IDPKey, idp)
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
+	experience, err := h.eu.PostExperience(ctx, inputExperience)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())

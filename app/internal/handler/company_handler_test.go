@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,7 @@ type mockCompanyUsecase struct {
 	testifymock.Mock
 }
 
-func (m *mockCompanyUsecase) SearchCompanies(ctx echo.Context, keyword string) ([]model.CompanyBasicInfo, error) {
+func (m *mockCompanyUsecase) SearchCompanies(ctx context.Context, keyword string) ([]model.CompanyBasicInfo, error) {
 	args := m.Called(ctx, keyword)
 	return args.Get(0).([]model.CompanyBasicInfo), args.Error(1)
 }

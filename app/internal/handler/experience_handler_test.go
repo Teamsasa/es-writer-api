@@ -37,8 +37,10 @@ func TestExperienceHandler_GetExperienceByUserID(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequest(http.MethodGet, "/api/experience", nil)
+		req.Header.Set("idp", "test-idp")
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set("userID", "test-user-id")
 
 		err := h.GetExperienceByUserID(c)
 		assert.NoError(t, err)
@@ -81,8 +83,10 @@ func TestExperienceHandler_PostExperience(t *testing.T) {
 		reqBody, _ := json.Marshal(inputExperience)
 		req := httptest.NewRequest(http.MethodPost, "/api/experience", bytes.NewBuffer(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set("idp", "test-idp")
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set("userID", "test-user-id")
 
 		err := h.PostExperience(c)
 		assert.NoError(t, err)

@@ -18,7 +18,7 @@ func TestCompanyResearchRepository_FindByCompanyID(t *testing.T) {
 	repo := repository.NewCompanyResearchRepository(db)
 
 	t.Run("異常系:企業情報が存在しない場合", func(t *testing.T) {
-		ctx := test.SetupEchoContext("")
+		ctx := test.SetupContextContext("test-user-id")
 		research, err := repo.FindByCompanyID(ctx, "non-existent-id")
 
 		assert.NoError(t, err)
@@ -28,7 +28,8 @@ func TestCompanyResearchRepository_FindByCompanyID(t *testing.T) {
 	t.Run("正常系:企業情報が存在する場合", func(t *testing.T) {
 		dummyResearch := factory.CreateCompanyResearch(t, db)
 
-		ctx := test.SetupEchoContext("")
+		// context.Background()ではなく、正しくセットアップされたコンテキストを使用
+		ctx := test.SetupContextContext("test-user-id")
 		research, err := repo.FindByCompanyID(ctx, dummyResearch.CompanyID)
 		assert.NoError(t, err)
 		assert.NotNil(t, research)
@@ -55,7 +56,7 @@ func TestCompanyResearchRepository_Create(t *testing.T) {
 			TalentNeeds: "テスト求める人材像2",
 		}
 
-		ctx := test.SetupEchoContext("")
+		ctx := test.SetupContextContext("test-user-id")
 		err := repo.Create(ctx, newResearch)
 
 		assert.NoError(t, err)

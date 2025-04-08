@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -8,6 +9,8 @@ import (
 	"es-api/app/internal/usecase"
 
 	"github.com/labstack/echo/v4"
+
+	"es-api/app/internal/contextKey"
 )
 
 type LLMGenerateHandler interface {
@@ -41,7 +44,13 @@ func (h *llmGenerateHandler) Generate(c echo.Context) error {
 		})
 	}
 
-	result, err := h.llmenerateUsecase.LLMGenerate(c, *req)
+	ctx := c.Request().Context()
+	idp := c.Request().Header.Get("idp")
+	userID := c.Get("userID")
+	ctx = context.WithValue(ctx, contextKey.IDPKey, idp)
+	ctx = context.WithValue(ctx, contextKey.UserIDKey, userID)
+
+	result, err := h.llmenerateUsecase.LLMGenerate(ctx, *req)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
