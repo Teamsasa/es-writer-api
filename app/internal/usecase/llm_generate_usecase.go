@@ -264,7 +264,7 @@ func (u *llmGenerateUsecase) buildPrompt(question string, companyInfo *model.Com
 func loadPromptFromFile(filename string) (string, error) {
 	paths := []string{
 		filename,
-		filepath.Join("../../internal/usecase/prompts", filename),
+		filepath.Join("./prompts", filename),
 	}
 
 	var content []byte

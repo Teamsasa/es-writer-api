@@ -16,7 +16,7 @@ down: ## Stop the application
 	@docker-compose down -v
 
 migrate: ## Run database migrations
-	@docker-compose run --rm api /migrate
+	@docker-compose run --rm api ./migrate
 
 prune: ## Remove dangling images
 	@docker image prune -f
