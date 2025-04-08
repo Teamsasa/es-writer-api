@@ -33,10 +33,9 @@ func (r *gbizInfoRepository) SearchCompanies(ctx context.Context, keyword string
 	}
 
 	// リクエストの構築
-	// TODO statusや人数などである程度絞る
 	req, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("%s?name=%s", r.baseURL, url.QueryEscape(keyword)),
+		fmt.Sprintf("%s?name=%s&exist_flg=true", r.baseURL, url.QueryEscape(keyword)),
 		nil,
 	)
 	if err != nil {
