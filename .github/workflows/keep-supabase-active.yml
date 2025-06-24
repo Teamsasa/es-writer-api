@@ -5,18 +5,9 @@ on:
     - cron: '0 9 * * *'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  models: read
-
 jobs:
   supabase-workflow:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-      AI_MODEL: ${{vars.AI_MODEL}}
-      AI_PROMPT: ${{vars.AI_PROMPT}}
-      TABLE_NAME: ${{vars.TABLE_NAME}}
       
     steps:
       - name: Set up Node.js
@@ -27,20 +18,53 @@ jobs:
       - name: Install Supabase Client
         run: npm install @supabase/supabase-js
       
-      - name: Setup gh models extension
-        run: gh extension install github/gh-models
-      
-      - name: Generate data with AI
+      - name: Generate data with Gemini AI
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AI_MODEL: ${{vars.AI_MODEL}}
+          AI_PROMPT: ${{vars.AI_PROMPT}}
         run: |
-          echo "🤖 Generating data with AI..."
-          gh models run $AI_MODEL "$AI_PROMPT" > generated_data.json
-          echo "✅ Data saved to generated_data.json"
-          ls -la generated_data.json
+          echo "🤖 Generating data with Gemini AI..."
+          curl "https://generativelanguage.googleapis.com/v1beta/models/${AI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+            -H 'Content-Type: application/json' \
+            -X POST \
+            -d '{
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "'"${AI_PROMPT}"'"
+                    }
+                  ]
+                }
+              ]
+            }' > gemini_response.json
+          echo "✅ Data saved to gemini_response.json"
+          ls -la gemini_response.json
+
+      - name: Extract generated data from Gemini response
+        run: |
+          echo "🔍 Extracting generated data from Gemini response..."
+          node -e "
+          const fs = require('fs');
+          const response = JSON.parse(fs.readFileSync('gemini_response.json', 'utf8'));
+          let text = '';
+          try {
+            text = response.candidates[0].content.parts[0].text;
+          } catch (e) {
+            console.error('❌ Failed to extract text from Gemini response:', e.message);
+            process.exit(1);
+          }
+          // 生成された文字列のみをファイルに保存
+          fs.writeFileSync('generated_data.json', text);
+          console.log('✅ Extracted and saved to generated_data.json');
+          "
       
       - name: Run Supabase Activity
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          TABLE_NAME: ${{vars.TABLE_NAME}}
         run: |
           node -e "
           (async () => {
